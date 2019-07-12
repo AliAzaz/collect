@@ -60,4 +60,6 @@ the License.
     <color name="mapPointCircle">#ffff0000</color>
     <color name="mapPointFill">#ffffffff</color>
     <color name="mapLine">#ffff0000</color>
+
+    <color name="zxing_transparent">#00000000</color>
 </resources>

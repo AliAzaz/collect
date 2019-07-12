@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="MainMenuBigButton">
         <item name="android:padding">20dp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">21sp</item>
         <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@color/green_500</item>
+    </style>
+
+    <style name="textInput" parent="android:Widget.Material.Light.EditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:typeface">serif</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:textColorHint">@color/amber_500</item>
+
     </style>
 </resources>

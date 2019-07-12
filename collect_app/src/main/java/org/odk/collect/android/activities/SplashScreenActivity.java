@@ -122,12 +122,12 @@ public class SplashScreenActivity extends Activity {
             editor.commit();
             startSplashScreen(splashPath);
         } else {
-            endSplashScreen();
+            startSplashScreen(splashPath);
         }
     }
 
     private void endSplashScreen() {
-        startActivity(new Intent(this, MainMenuActivity.class));
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 
@@ -197,8 +197,8 @@ public class SplashScreenActivity extends Activity {
                 try {
                     super.run();
                     while (count < SPLASH_TIMEOUT) {
-                        sleep(100);
-                        count += 100;
+                        sleep(1000);
+                        count += 1000;
                     }
                 } catch (Exception e) {
                     Timber.e(e);

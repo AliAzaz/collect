@@ -21,15 +21,16 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Bundle;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import androidx.annotation.Nullable;
-import androidx.multidex.MultiDex;
-import androidx.appcompat.app.AppCompatDelegate;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.multidex.MultiDex;
 
 import com.crashlytics.android.Crashlytics;
 import com.evernote.android.job.JobManager;
@@ -38,8 +39,8 @@ import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.android.gms.security.ProviderInstaller;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 
@@ -176,9 +177,7 @@ public class Collect extends Application {
             dirPath = dirPath.substring(Collect.ODK_ROOT.length());
             String[] parts = dirPath.split(File.separatorChar == '\\' ? "\\\\" : File.separator);
             // [appName, instances, tableId, instanceId ]
-            if (parts.length == 4 && parts[1].equals("instances")) {
-                return true;
-            }
+            return parts.length == 4 && parts[1].equals("instances");
         }
         return false;
     }
@@ -200,10 +199,16 @@ public class Collect extends Application {
         this.externalDataManager = externalDataManager;
     }
 
-    public String getVersionedAppName() {
-        String versionName = BuildConfig.VERSION_NAME;
-        versionName = " " + versionName.replaceFirst("-", "\n");
-        return getString(R.string.app_name) + versionName;
+    /**
+     * Gets a unique, privacy-preserving identifier for a form based on its id and version.
+     *
+     * @param formId      id of a form
+     * @param formVersion version of a form
+     * @return md5 hash of the form title, a space, the form ID
+     */
+    public static String getFormIdentifierHash(String formId, String formVersion) {
+        String formIdentifier = new FormsDao().getFormTitleForFormIdAndFormVersion(formId, formVersion) + " " + formId;
+        return FileUtils.getMd5Hash(new ByteArrayInputStream(formIdentifier.getBytes()));
     }
 
     public boolean isNetworkAvailable() {
@@ -420,16 +425,10 @@ public class Collect extends Application {
         return FileUtils.getMd5Hash(new ByteArrayInputStream(formIdentifier.getBytes()));
     }
 
-
-    /**
-     * Gets a unique, privacy-preserving identifier for a form based on its id and version.
-     * @param formId id of a form
-     * @param formVersion version of a form
-     * @return md5 hash of the form title, a space, the form ID
-     */
-    public static String getFormIdentifierHash(String formId, String formVersion) {
-        String formIdentifier = new FormsDao().getFormTitleForFormIdAndFormVersion(formId, formVersion) + " " + formId;
-        return FileUtils.getMd5Hash(new ByteArrayInputStream(formIdentifier.getBytes()));
+    public String getVersionedAppName() {
+        String versionName = BuildConfig.VERSION_NAME;
+        versionName = " " + versionName.replaceFirst("-", "\n");
+        return getString(R.string.app_name) + "\n" + versionName;
     }
 
     public void logNullFormControllerEvent(String action) {
