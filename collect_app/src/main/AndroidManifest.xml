@@ -82,7 +82,7 @@ the specific language governing permissions and limitations under the License.
 
     <application
         android:name=".application.Collect"
-        android:icon="@mipmap/uen_round"
+        android:icon="@drawable/akulogo"
         android:installLocation="auto"
         android:label="@string/app_name"
         android:largeHeap="true"

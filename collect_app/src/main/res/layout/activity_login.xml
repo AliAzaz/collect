@@ -120,6 +120,7 @@
                         android:singleLine="true"
                         android:textAlignment="gravity"
                         android:textColor="@color/defaultLightIconColor"
+                        android:textColorHint="@color/green_500"
                         android:textSize="18sp">
 
                         <requestFocus />
@@ -157,6 +158,7 @@
                         android:singleLine="true"
                         android:textAlignment="gravity"
                         android:textColor="@color/defaultLightIconColor"
+                        android:textColorHint="@color/green_500"
                         android:textSize="18sp" />
 
                 </androidx.cardview.widget.CardView>
