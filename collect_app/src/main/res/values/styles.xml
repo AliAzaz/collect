@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Widget.Collect.Button.Big" parent="Widget.AppCompat.Button">
         <item name="android:padding">20dp</item>
@@ -52,5 +52,16 @@
 
     <style name="Widget.Collect.Toolbar" parent="Widget.AppCompat.Toolbar">
         <item name="titleTextAppearance">@style/TextAppearance.Collect.Headline6</item>
+    </style>
+
+    <style name="textInput" parent="android:Widget.Material.Light.EditText" tools:targetApi="lollipop">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:typeface">serif</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:textColorHint">@color/amber_500</item>
+
     </style>
 </resources>
