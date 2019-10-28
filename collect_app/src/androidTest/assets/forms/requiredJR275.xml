@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa"
+    xmlns="http://www.w3.org/2002/xforms">
+  <h:head>
+    <h:title>required</h:title>
+    <model>
+      <instance>
+        <required id="required">
+          <text/>
+          <meta>
+            <instanceID/>
+          </meta>
+        </required>
+      </instance>
+      <bind jr:requiredMsg="Custom required message" nodeset="/required/text" required="true()" type="string"/>
+      <bind calculate="concat('uuid:', uuid())" nodeset="/required/meta/instanceID" readonly="true()" type="string"/>
+    </model>
+  </h:head>
+  <h:body>
+    <input ref="/required/text">
+      <label>Foo</label>
+    </input>
+  </h:body>
+</h:html>

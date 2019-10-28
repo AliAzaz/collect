@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
   <string name="show_password">पासवर्ड दिखायें </string>
   <string name="activity_not_found">%s:के नियंत्रण के लिए कोई गतिविधि नहीं  मिली</string>
   <string name="view_image">इमेज देखें</string>
@@ -10,8 +10,6 @@
   <string name="add_another_repeat">एक और “%s” समूह जोड़ें</string>
   <string name="add_repeat">एक नया \"%s\" समूह जोड़ें?</string>
   <string name="add_repeat_no">न जोड़ें</string>
-  <string name="audio_file_error">कोई ऑडियो फाइल निर्दिष्ट नहीं की गई थी।</string>
-  <string name="audio_file_invalid">फाइल: %s मान्य ऑडियो फाइल नहीं.</string>
   <string name="cancel">रद्द करें</string>
   <string name="cancel_loading_form">रद्द करें</string>
   <string name="cancel_location">रद्द करें</string>
@@ -145,7 +143,6 @@
   <string name="root_namespace_error">रूट एलिमेंट नेमस्पेस गलत है: %s</string>
   <string name="manifest_tag_error">मेन्फेस्ट एंट्री %sमें एक या अधिक टैग लापता हैं: फ़ाइल नाम, हैश, या डाउनलोडUrl</string>
   <string name="form_download_progress">%1$s. %3$sकी %2$sमीडिया फाइलें मिल रही हैं: </string>
-  <string name="file_fetch_failed">गलती: %1$sपर %2$s (%3$s)  </string>
   <string name="fetching_manifest">%s. मेनीफेस्ट मिल रहा है </string>
   <string name="success">सफल</string>
   <string name="no_forms_uploaded">क्षमा करें, कोई फॉर्म अपलोड नहीं किया गया.</string>
@@ -280,22 +277,18 @@
   <string name="google_play_services_error_occured">गूगल मानचित्र तक पहुंचने में असमर्थ क्या गूगल प्ले सर्विस इनस्टॉल है?</string>
   <string name="about_preferences">बारे में </string>
   <!--Geo string added in feature-geofeatures branch-->
-  <string name="map_sdk_selector_title">मानचित्रण SDK</string>
-  <string name="map_sdk_behavior">मानचित्रण SDK</string>
-  <string name="google_maps_sdk">गूगल मैप SDK</string>
-  <string name="openstreetmap_sdk">ओपन स्ट्रीट मैप SDK</string>
-  <string name="show_map_sdk">मैप SDK विकल्प दिखायें </string>
-  <string name="openmap_streets">OSM स्ट्रीट</string>
+    <!--TODO(ping): Delete these openmap_* strings when we're ready to move on from OSMDroid.
+        These strings are only being used to preserve compatibility with pre-existing
+         tile caches, and are not shown in the UI.-->
   <string name="openmap_usgs_topo">USGS National Map Topo</string>
   <string name="openmap_stamen_terrain">स्टैमन टेरेन</string>
   <string name="openmap_cartodb_positron">CartoDB Positron</string>
   <string name="openmap_cartodb_darkmatter">CartoDB डार्क मैटर</string>
+    <string name="basemap">बेसमैप</string>
   <string name="streets">स्ट्रीट</string>
   <string name="terrain"> भूभाग</string>
   <string name="hybrid">हाइब्रिड </string>
   <string name="satellite">उपग्रह</string>
-  <string name="map_basemap_selector_title">बेसमैप्स</string>
-  <string name="show_map_basemap">बेसमैप विकल्प दिखाएं</string>
   <string name="save_point">जिओपॉइंट संरक्षित करे</string>
   <string name="get_point"> जिओपॉइंट शुरू करे </string>
   <string name="geopoint_view_read_only">जिओपॉइंट  देखे</string>
@@ -305,8 +298,6 @@
   <string name="start">शुरु करे</string>
   <string name="enable_gps">जीपीएस सक्षम करें</string>
   <string name="geotrace_title">जिओ ट्रेस</string>
-  <string name="gps_enable_message">आपके डिवाइस में जीपीएस सक्षम नही है. क्या आप इसे सक्षम करना चाहेंगे?</string>
-  <string name="select_offline_layer">ऑफ़लाइन लेयर चुनें</string>
   <string name="geo_clear_warning">फीचर पहले से ही बना है. क्या आप फीचर को क्लियर करना चाहेंगे?</string>
   <string name="geo_exit_warning">परिवर्तनों को रद्द करें और वापस ODK पर लौटें?</string>
   <string name="polygon_validator">बहुभुज बनाने के लिए कम से कम 3 पॉइंट होने चाहिए</string>
@@ -441,7 +432,6 @@
   <string name="wifi_autosend">केवल वाई-फाई </string>
   <string name="cellular_autosend"> केवल सेलुलर</string>
   <string name="wifi_cellular_autosend">वाई-फाई या सेलुलर</string>
-  <string name="map_basemap_behavior_title">बेसमैप</string>
   <string name="form_management_preferences">फॉर्म मैनेजमेंट</string>
   <string name="form_submission_category">फॉर्म भेजना</string>
   <string name="form_filling_category">फॉर्म भरना</string>
@@ -454,7 +444,6 @@
   <string name="type">प्रकार</string>
   <string name="form_entry">फॉर्म एंट्री से छुपाने के लिए चेक हटायें</string>
   <string name="use_device_language">डिवाइस की भाषा प्रयोग करें </string>
-  <string name="not_supported_offline_layer_format">चयनित ऑफलाइन लेयर फाइल PBF फॉर्मेट उपयोग करती है जो कि समर्थित नहीं है! </string>
   <!--<string name="submission_transport_admin_setting">Submission transport</string>-->
   <string name="search">खोज</string>
   <!--Displays dates in specialized calendars with the Gregorian dates in parentheses. This is translated so right-to-left languages can specify the correct order-->

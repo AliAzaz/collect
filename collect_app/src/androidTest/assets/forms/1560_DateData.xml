@@ -1,0 +1,24 @@
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/2002/xforms">
+    <h:head>
+        <h:title>1560_DateData</h:title>
+        <model>
+            <instance>
+                <data id="1560_DateData">
+                    <meta>
+                        <instanceID />
+                        <instanceName>1900-1-1</instanceName>
+                    </meta>
+                </data>
+            </instance>
+            <itext>
+                <translation lang="English"></translation>
+            </itext>
+            <bind calculate="concat('uuid:', uuid())" nodeset="/data/meta/instanceID"
+                readonly="true()" type="string" />
+            <bind nodeset="/data/meta/instanceName" type="date" />
+        </model>
+    </h:head>
+    <h:body>
+        <input ref="/data/meta/instanceName"></input>
+    </h:body>
+</h:html>

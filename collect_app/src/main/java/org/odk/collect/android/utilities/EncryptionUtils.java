@@ -17,8 +17,9 @@ package org.odk.collect.android.utilities;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
-import androidx.annotation.Nullable;
 import android.util.Base64;
+
+import androidx.annotation.Nullable;
 
 import org.apache.commons.io.IOUtils;
 import org.kxml2.io.KXmlSerializer;
@@ -41,7 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -103,156 +104,21 @@ public class EncryptionUtils {
     private EncryptionUtils() {
     }
 
-    public static final class EncryptedFormInformation {
-        public final String formId;
-        public final String formVersion;
-        public final InstanceMetadata instanceMetadata;
-        public final PublicKey rsaPublicKey;
-        public final String base64RsaEncryptedSymmetricKey;
-        public final SecretKeySpec symmetricKey;
-        public final byte[] ivSeedArray;
-        private int ivCounter;
-        public final StringBuilder elementSignatureSource = new StringBuilder();
-        private boolean isNotBouncyCastle;
-
-        EncryptedFormInformation(String formId, String formVersion,
-                                 InstanceMetadata instanceMetadata, PublicKey rsaPublicKey) {
-            this.formId = formId;
-            this.formVersion = formVersion;
-            this.instanceMetadata = instanceMetadata;
-            this.rsaPublicKey = rsaPublicKey;
-
-            // generate the symmetric key from random bits...
-
-            SecureRandom r = new SecureRandom();
-            byte[] key = new byte[SYMMETRIC_KEY_LENGTH / 8];
-            r.nextBytes(key);
-            symmetricKey = new SecretKeySpec(key, SYMMETRIC_ALGORITHM);
-
-            // construct the fixed portion of the iv -- the ivSeedArray
-            // this is the md5 hash of the instanceID and the symmetric key
-            try {
-                MessageDigest md = MessageDigest.getInstance("MD5");
-                md.update(instanceMetadata.instanceId.getBytes(UTF_8));
-                md.update(key);
-                byte[] messageDigest = md.digest();
-                ivSeedArray = new byte[IV_BYTE_LENGTH];
-                for (int i = 0; i < IV_BYTE_LENGTH; ++i) {
-                    ivSeedArray[i] = messageDigest[i % messageDigest.length];
-                }
-            } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-                Timber.e(e, "Unable to set md5 hash for instanceid and symmetric key.");
-                throw new IllegalArgumentException(e.getMessage());
-            }
-
-            // construct the base64-encoded RSA-encrypted symmetric key
-            try {
-                Cipher pkCipher;
-                pkCipher = Cipher.getInstance(ASYMMETRIC_ALGORITHM);
-                // write AES key
-                pkCipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
-                byte[] pkEncryptedKey = pkCipher.doFinal(key);
-                String alg = pkCipher.getAlgorithm();
-                Timber.i("Algorithm Used: %s", alg);
-                base64RsaEncryptedSymmetricKey = Base64.encodeToString(pkEncryptedKey, Base64.NO_WRAP);
-
-            } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-                Timber.e(e, "Unable to encrypt the symmetric key.");
-                throw new IllegalArgumentException(e.getMessage());
-            }
-
-            // start building elementSignatureSource...
-            appendElementSignatureSource(formId);
-            if (formVersion != null) {
-                appendElementSignatureSource(formVersion);
-            }
-            appendElementSignatureSource(base64RsaEncryptedSymmetricKey);
-
-            appendElementSignatureSource(instanceMetadata.instanceId);
-        }
-
-        public void appendElementSignatureSource(String value) {
-            elementSignatureSource.append(value).append('\n');
-        }
-
-        public void appendFileSignatureSource(File file) {
-            String md5Hash = FileUtils.getMd5Hash(file);
-            appendElementSignatureSource(file.getName() + "::" + md5Hash);
-        }
-
-        public String getBase64EncryptedElementSignature() {
-            // Step 0: construct the text of the elements in elementSignatureSource (done)
-            //     Where...
-            //      * Elements are separated by newline characters.
-            //      * Filename is the unencrypted filename (no .enc suffix).
-            //      * Md5 hashes of the unencrypted files' contents are converted
-            //        to zero-padded 32-character strings before concatenation.
-            //      Assumes this is in the order:
-            //          formId
-            //          version   (omitted if null)
-            //          base64RsaEncryptedSymmetricKey
-            //          instanceId
-            //          for each media file { filename "::" md5Hash }
-            //          submission.xml "::" md5Hash
-
-            // Step 1: construct the (raw) md5 hash of Step 0.
-            byte[] messageDigest;
-            try {
-                MessageDigest md = MessageDigest.getInstance("MD5");
-                md.update(elementSignatureSource.toString().getBytes(UTF_8));
-                messageDigest = md.digest();
-            } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-                Timber.e(e, "Exception thrown while constructing md5 hash.");
-                throw new IllegalArgumentException(e.getMessage());
-            }
-
-            // Step 2: construct the base64-encoded RSA-encrypted md5
-            try {
-                Cipher pkCipher;
-                pkCipher = Cipher.getInstance(ASYMMETRIC_ALGORITHM);
-                // write AES key
-                pkCipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
-                byte[] pkEncryptedKey = pkCipher.doFinal(messageDigest);
-                return Base64.encodeToString(pkEncryptedKey, Base64.NO_WRAP);
-
-            } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-                Timber.e(e, "Unable to encrypt the symmetric key.");
-                throw new IllegalArgumentException(e.getMessage());
-            }
-        }
-
-        public Cipher getCipher() throws InvalidKeyException,
-                InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-                NoSuchPaddingException {
-            ++ivSeedArray[ivCounter % ivSeedArray.length];
-            ++ivCounter;
-            IvParameterSpec baseIv = new IvParameterSpec(ivSeedArray);
-            Cipher c = null;
-            try {
-                c = Cipher.getInstance(EncryptionUtils.SYMMETRIC_ALGORITHM, "BC");
-                isNotBouncyCastle = false;
-            } catch (NoSuchProviderException e) {
-                Timber.w(e, "Unable to obtain BouncyCastle provider! Decryption may fail.");
-                isNotBouncyCastle = true;
-                c = Cipher.getInstance(EncryptionUtils.SYMMETRIC_ALGORITHM);
-            }
-            c.init(Cipher.ENCRYPT_MODE, symmetricKey, baseIv);
-            return c;
-        }
-
-        public boolean isNotBouncyCastle() {
-            return isNotBouncyCastle;
-        }
-    }
-
     /**
      * Retrieve the encryption information for this uri.
      *
-     * @param uri either an instance URI (if previously saved) or a form URI
+     * @param   uri either an instance URI (if previously saved) or a form URI
+     * @param   instanceMetadata the metadata for this instance used to check if the form definition
+     *                           defines an instanceID
+     * @return an {@link EncryptedFormInformation} object if the form definition requests encryption
+     *          and the record can be encrypted. {@code null} if the form definition does not request
+     *          encryption or if the BouncyCastle implementation is not present.
+     *
+     * @throws EncryptionException if the form definition requests encryption but the record can't
+     *                              be encrypted
      */
     public static EncryptedFormInformation getEncryptedFormInformation(Uri uri,
             InstanceMetadata instanceMetadata) throws EncryptionException {
-
         ContentResolver cr = Collect.getInstance().getContentResolver();
 
         // fetch the form information
@@ -298,7 +164,7 @@ public class EncryptionUtils {
 
                 if (formCursor.getCount() != 1) {
                     String msg = Collect.getInstance().getString(R.string.not_exactly_one_blank_form_for_this_form_id);
-                    Timber.e(msg);
+                    Timber.d(msg);
                     throw new EncryptionException(msg, null);
                 }
                 formCursor.moveToFirst();
@@ -306,7 +172,7 @@ public class EncryptionUtils {
                 formCursor = cr.query(uri, null, null, null, null);
                 if (formCursor.getCount() != 1) {
                     String msg = Collect.getInstance().getString(R.string.not_exactly_one_blank_form_for_this_form_id);
-                    Timber.e(msg);
+                    Timber.d(msg);
                     throw new EncryptionException(msg, null);
                 }
                 formCursor.moveToFirst();
@@ -315,7 +181,7 @@ public class EncryptionUtils {
             formId = formCursor.getString(formCursor.getColumnIndex(FormsColumns.JR_FORM_ID));
             if (formId == null || formId.length() == 0) {
                 String msg = Collect.getInstance().getString(R.string.no_form_id_specified);
-                Timber.e(msg);
+                Timber.d(msg);
                 throw new EncryptionException(msg, null);
             }
             int idxVersion = formCursor.getColumnIndex(FormsColumns.JR_VERSION);
@@ -336,14 +202,14 @@ public class EncryptionUtils {
                 kf = KeyFactory.getInstance(RSA_ALGORITHM);
             } catch (NoSuchAlgorithmException e) {
                 String msg = Collect.getInstance().getString(R.string.phone_does_not_support_rsa);
-                Timber.e(e, "%s due to %s ", msg, e.getMessage());
+                Timber.d(e, "%s due to %s ", msg, e.getMessage());
                 throw new EncryptionException(msg, e);
             }
             try {
                 pk = kf.generatePublic(publicKeySpec);
             } catch (InvalidKeySpecException e) {
                 String msg = Collect.getInstance().getString(R.string.invalid_rsa_public_key);
-                Timber.e(e, "%s due to %s ", msg, e.getMessage());
+                Timber.d(e, "%s due to %s ", msg, e.getMessage());
                 throw new EncryptionException(msg, e);
             }
         } finally {
@@ -352,11 +218,9 @@ public class EncryptionUtils {
             }
         }
 
-        // submission must have an OpenRosa metadata block with a non-null
-        // instanceID value.
+        // submission must have an OpenRosa metadata block with a non-null instanceID
         if (instanceMetadata.instanceId == null) {
-            Timber.e("No OpenRosa metadata block or no instanceId defined in that block");
-            return null;
+            throw new EncryptionException("This form does not specify an instanceID. You must specify one to enable encryption.", null);
         }
 
         // For now, prevent encryption if the BouncyCastle implementation is not present.
@@ -372,11 +236,52 @@ public class EncryptionUtils {
             } else {
                 msg = "No BouncyCastle provider for padding implementation of symmetric algorithm!";
             }
-            Timber.e(msg);
+            Timber.d(msg);
             return null;
         }
 
         return new EncryptedFormInformation(formId, formVersion, instanceMetadata, pk);
+    }
+
+    private static List<File> encryptSubmissionFiles(File instanceXml,
+                                                     File submissionXml, EncryptedFormInformation formInfo)
+            throws IOException, EncryptionException {
+        // NOTE: assume the directory containing the instanceXml contains ONLY
+        // files related to this one instance.
+        File instanceDir = instanceXml.getParentFile();
+
+        // encrypt files that do not end with ".enc", and do not start with ".";
+        // ignore directories
+        File[] allFiles = instanceDir.listFiles();
+        List<File> filesToProcess = new ArrayList<>();
+        for (File f : allFiles) {
+            if (f.equals(instanceXml)) {
+                continue; // don't touch restore file
+            }
+            if (f.equals(submissionXml)) {
+                continue; // handled last
+            }
+            if (f.isDirectory()) {
+                continue; // don't handle directories
+            }
+            if (f.getName().startsWith(".")) {
+                continue; // MacOSX garbage
+            }
+            if (f.getName().endsWith(".enc")) {
+                f.delete(); // try to delete this (leftover junk)
+            } else {
+                filesToProcess.add(f);
+            }
+        }
+        // encrypt here...
+        for (File f : filesToProcess) {
+            encryptFile(f, formInfo);
+        }
+
+        // encrypt the submission.xml as the last file...
+        encryptFile(submissionXml, formInfo);
+
+        return filesToProcess;
     }
 
     private static void encryptFile(File file, EncryptedFormInformation formInfo)
@@ -460,72 +365,6 @@ public class EncryptionUtils {
         return allSuccessful;
     }
 
-    private static List<File> encryptSubmissionFiles(File instanceXml,
-            File submissionXml, EncryptedFormInformation formInfo)
-            throws IOException, EncryptionException {
-        // NOTE: assume the directory containing the instanceXml contains ONLY
-        // files related to this one instance.
-        File instanceDir = instanceXml.getParentFile();
-
-        // encrypt files that do not end with ".enc", and do not start with ".";
-        // ignore directories
-        File[] allFiles = instanceDir.listFiles();
-        List<File> filesToProcess = new ArrayList<File>();
-        for (File f : allFiles) {
-            if (f.equals(instanceXml)) {
-                continue; // don't touch restore file
-            }
-            if (f.equals(submissionXml)) {
-                continue; // handled last
-            }
-            if (f.isDirectory()) {
-                continue; // don't handle directories
-            }
-            if (f.getName().startsWith(".")) {
-                continue; // MacOSX garbage
-            }
-            if (f.getName().endsWith(".enc")) {
-                f.delete(); // try to delete this (leftover junk)
-            } else {
-                filesToProcess.add(f);
-            }
-        }
-        // encrypt here...
-        for (File f : filesToProcess) {
-            encryptFile(f, formInfo);
-        }
-
-        // encrypt the submission.xml as the last file...
-        encryptFile(submissionXml, formInfo);
-
-        return filesToProcess;
-    }
-
-    /**
-     * Constructs the encrypted attachments, encrypted form xml, and the
-     * plaintext submission manifest (with signature) for the form submission.
-     *
-     * Does not delete any of the original files.
-     */
-    public static void generateEncryptedSubmission(File instanceXml,
-            File submissionXml, EncryptedFormInformation formInfo)
-            throws IOException, EncryptionException {
-        // submissionXml is the submission data to be published to Aggregate
-        if (!submissionXml.exists() || !submissionXml.isFile()) {
-            throw new IOException("No submission.xml found");
-        }
-
-        // TODO: confirm that this xml is not already encrypted...
-
-        // Step 1: encrypt the submission and all the media files...
-        List<File> mediaFiles = encryptSubmissionFiles(instanceXml,
-                submissionXml, formInfo);
-
-        // Step 2: build the encrypted-submission manifest (overwrites
-        // submission.xml)...
-        writeSubmissionManifest(formInfo, submissionXml, mediaFiles);
-    }
-
     private static void writeSubmissionManifest(
             EncryptedFormInformation formInfo,
             File submissionXml, List<File> mediaFiles) throws EncryptionException {
@@ -581,7 +420,7 @@ public class EncryptionUtils {
         OutputStreamWriter writer = null;
         try {
             fout = new FileOutputStream(submissionXml);
-            writer = new OutputStreamWriter(fout, UTF_8);
+            writer = new OutputStreamWriter(fout, StandardCharsets.UTF_8);
 
             KXmlSerializer serializer = new KXmlSerializer();
             serializer.setOutput(writer);
@@ -600,6 +439,173 @@ public class EncryptionUtils {
         } finally {
             IOUtils.closeQuietly(writer);
             IOUtils.closeQuietly(fout);
+        }
+    }
+
+    /**
+     * Constructs the encrypted attachments, encrypted form xml, and the
+     * plaintext submission manifest (with signature) for the form submission.
+     * <p>
+     * Does not delete any of the original files.
+     */
+    public static void generateEncryptedSubmission(File instanceXml,
+                                                   File submissionXml, EncryptedFormInformation formInfo)
+            throws IOException, EncryptionException {
+        // submissionXml is the submission data to be published to Aggregate
+        if (!submissionXml.exists() || !submissionXml.isFile()) {
+            throw new IOException("No submission.xml found");
+        }
+
+        // TODO: confirm that this xml is not already encrypted...
+
+        // Step 1: encrypt the submission and all the media files...
+        List<File> mediaFiles = encryptSubmissionFiles(instanceXml,
+                submissionXml, formInfo);
+
+        // Step 2: build the encrypted-submission manifest (overwrites
+        // submission.xml)...
+        writeSubmissionManifest(formInfo, submissionXml, mediaFiles);
+    }
+
+    public static final class EncryptedFormInformation {
+        public final String formId;
+        public final String formVersion;
+        public final InstanceMetadata instanceMetadata;
+        public final PublicKey rsaPublicKey;
+        public final String base64RsaEncryptedSymmetricKey;
+        public final SecretKeySpec symmetricKey;
+        public final byte[] ivSeedArray;
+        private int ivCounter;
+        public final StringBuilder elementSignatureSource = new StringBuilder();
+        private boolean isNotBouncyCastle;
+
+        EncryptedFormInformation(String formId, String formVersion,
+                                 InstanceMetadata instanceMetadata, PublicKey rsaPublicKey) {
+            this.formId = formId;
+            this.formVersion = formVersion;
+            this.instanceMetadata = instanceMetadata;
+            this.rsaPublicKey = rsaPublicKey;
+
+            // generate the symmetric key from random bits...
+
+            SecureRandom r = new SecureRandom();
+            byte[] key = new byte[SYMMETRIC_KEY_LENGTH / 8];
+            r.nextBytes(key);
+            symmetricKey = new SecretKeySpec(key, SYMMETRIC_ALGORITHM);
+
+            // construct the fixed portion of the iv -- the ivSeedArray
+            // this is the md5 hash of the instanceID and the symmetric key
+            try {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                md.update(instanceMetadata.instanceId.getBytes(StandardCharsets.UTF_8));
+                md.update(key);
+                byte[] messageDigest = md.digest();
+                ivSeedArray = new byte[IV_BYTE_LENGTH];
+                for (int i = 0; i < IV_BYTE_LENGTH; ++i) {
+                    ivSeedArray[i] = messageDigest[i % messageDigest.length];
+                }
+            } catch (NoSuchAlgorithmException e) {
+                Timber.e(e, "Unable to set md5 hash for instanceid and symmetric key.");
+                throw new IllegalArgumentException(e.getMessage());
+            }
+
+            // construct the base64-encoded RSA-encrypted symmetric key
+            try {
+                Cipher pkCipher;
+                pkCipher = Cipher.getInstance(ASYMMETRIC_ALGORITHM);
+                // write AES key
+                pkCipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
+                byte[] pkEncryptedKey = pkCipher.doFinal(key);
+                String alg = pkCipher.getAlgorithm();
+                Timber.i("Algorithm Used: %s", alg);
+                base64RsaEncryptedSymmetricKey = Base64.encodeToString(pkEncryptedKey, Base64.NO_WRAP);
+
+            } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+                Timber.e(e, "Unable to encrypt the symmetric key.");
+                throw new IllegalArgumentException(e.getMessage());
+            }
+
+            // start building elementSignatureSource...
+            appendElementSignatureSource(formId);
+            if (formVersion != null) {
+                appendElementSignatureSource(formVersion);
+            }
+            appendElementSignatureSource(base64RsaEncryptedSymmetricKey);
+
+            appendElementSignatureSource(instanceMetadata.instanceId);
+        }
+
+        public void appendElementSignatureSource(String value) {
+            elementSignatureSource.append(value).append('\n');
+        }
+
+        public void appendFileSignatureSource(File file) {
+            String md5Hash = FileUtils.getMd5Hash(file);
+            appendElementSignatureSource(file.getName() + "::" + md5Hash);
+        }
+
+        public String getBase64EncryptedElementSignature() {
+            // Step 0: construct the text of the elements in elementSignatureSource (done)
+            //     Where...
+            //      * Elements are separated by newline characters.
+            //      * Filename is the unencrypted filename (no .enc suffix).
+            //      * Md5 hashes of the unencrypted files' contents are converted
+            //        to zero-padded 32-character strings before concatenation.
+            //      Assumes this is in the order:
+            //          formId
+            //          version   (omitted if null)
+            //          base64RsaEncryptedSymmetricKey
+            //          instanceId
+            //          for each media file { filename "::" md5Hash }
+            //          submission.xml "::" md5Hash
+
+            // Step 1: construct the (raw) md5 hash of Step 0.
+            byte[] messageDigest;
+            try {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                md.update(elementSignatureSource.toString().getBytes(StandardCharsets.UTF_8));
+                messageDigest = md.digest();
+            } catch (NoSuchAlgorithmException e) {
+                Timber.e(e, "Exception thrown while constructing md5 hash.");
+                throw new IllegalArgumentException(e.getMessage());
+            }
+
+            // Step 2: construct the base64-encoded RSA-encrypted md5
+            try {
+                Cipher pkCipher;
+                pkCipher = Cipher.getInstance(ASYMMETRIC_ALGORITHM);
+                // write AES key
+                pkCipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
+                byte[] pkEncryptedKey = pkCipher.doFinal(messageDigest);
+                return Base64.encodeToString(pkEncryptedKey, Base64.NO_WRAP);
+
+            } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+                Timber.e(e, "Unable to encrypt the symmetric key.");
+                throw new IllegalArgumentException(e.getMessage());
+            }
+        }
+
+        public Cipher getCipher() throws InvalidKeyException,
+                InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+                NoSuchPaddingException {
+            ++ivSeedArray[ivCounter % ivSeedArray.length];
+            ++ivCounter;
+            IvParameterSpec baseIv = new IvParameterSpec(ivSeedArray);
+            Cipher c = null;
+            try {
+                c = Cipher.getInstance(EncryptionUtils.SYMMETRIC_ALGORITHM, "BC");
+                isNotBouncyCastle = false;
+            } catch (NoSuchProviderException e) {
+                Timber.w(e, "Unable to obtain BouncyCastle provider! Decryption may fail.");
+                isNotBouncyCastle = true;
+                c = Cipher.getInstance(EncryptionUtils.SYMMETRIC_ALGORITHM);
+            }
+            c.init(Cipher.ENCRYPT_MODE, symmetricKey, baseIv);
+            return c;
+        }
+
+        public boolean isNotBouncyCastle() {
+            return isNotBouncyCastle;
         }
     }
 }

@@ -14,11 +14,12 @@
 
 package org.odk.collect.android.utilities;
 
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
+import com.google.api.client.util.Base64;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -41,7 +42,7 @@ public class CompressionUtils {
         }
 
         // Encode string into bytes
-        byte[] input = data.getBytes("UTF-8");
+        byte[] input = data.getBytes(StandardCharsets.UTF_8);
 
         Deflater deflater = new Deflater();
         deflater.setInput(input);
@@ -87,7 +88,7 @@ public class CompressionUtils {
         byte[] result = outputStream.toByteArray();
 
         // Decode the bytes into a String
-        String outputString = new String(result, "UTF-8");
+        String outputString = new String(result, StandardCharsets.UTF_8);
         Timber.i("Compressed : %d", output.length);
         Timber.i("Decompressed : %d", result.length);
         return outputString;

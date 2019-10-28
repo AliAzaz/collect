@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.odk.collect.android.listeners.ActionListener;
+import org.odk.collect.android.preferences.utilities.ChangingServerUrlUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ import java.util.Map;
 import static org.odk.collect.android.preferences.AdminKeys.ALL_KEYS;
 import static org.odk.collect.android.preferences.AdminKeys.KEY_ADMIN_PW;
 import static org.odk.collect.android.preferences.GeneralKeys.GENERAL_KEYS;
-import static org.odk.collect.android.preferences.GeneralKeys.KEY_PASSWORD;
+import static org.odk.collect.android.preferences.GeneralKeys.KEY_SERVER_URL;
 
 public class PreferenceSaver {
 
@@ -41,49 +42,33 @@ public class PreferenceSaver {
         this.adminSharedPreferences = adminSharedPreferences;
     }
 
-    public void fromJSON(String content, @Nullable ActionListener listener) {
-        try {
-            JSONObject settingsJson = new JSONObject(content);
-            Map<String, Object> generalPrefs = convertJSONToMap(settingsJson.getJSONObject("general"));
-            JSONObject adminPrefsJson = settingsJson.getJSONObject("admin");
-
-            if (!(new PreferenceValidator(GENERAL_KEYS).isValid(generalPrefs))) {
-                if (listener != null) {
-                    listener.onFailure(new GeneralSharedPreferences.ValidationException());
+    public static void saveGeneralPrefs(GeneralSharedPreferences generalSharedPreferences, Map<String, Object> generalPrefs) {
+        for (String key : getAllGeneralKeys()) {
+            if (generalPrefs.containsKey(key)) {
+                Object value = generalPrefs.get(key);
+                generalSharedPreferences.save(key, value);
+                if (key.equals(KEY_SERVER_URL)) {
+                    ChangingServerUrlUtils.addUrlToList(String.valueOf(value));
                 }
-
-                return;
-            }
-
-            for (String key : getAllGeneralKeys()) {
-                if (generalPrefs.containsKey(key)) {
-                    Object value = generalPrefs.get(key);
-                    generalSharedPreferences.save(key, value);
-                } else {
-                    generalSharedPreferences.reset(key);
-                }
-            }
-
-            for (String key : getAllAdminKeys()) {
-
-                if (adminPrefsJson.has(key)) {
-                    Object value = adminPrefsJson.get(key);
-                    adminSharedPreferences.save(key, value);
-                } else {
-                    adminSharedPreferences.reset(key);
-                }
-            }
-
-            AutoSendPreferenceMigrator.migrate(settingsJson.getJSONObject("general"));
-
-            if (listener != null) {
-                listener.onSuccess();
-            }
-        } catch (JSONException exception) {
-            if (listener != null) {
-                listener.onFailure(exception);
+            } else {
+                generalSharedPreferences.reset(key);
             }
         }
+    }
+
+    public static void saveAdminPrefs(AdminSharedPreferences adminSharedPreferences, Map<String, Object> adminPrefsJson) {
+        for (String key : getAllAdminKeys()) {
+            if (adminPrefsJson.containsKey(key)) {
+                Object value = adminPrefsJson.get(key);
+                adminSharedPreferences.save(key, value);
+            } else {
+                adminSharedPreferences.reset(key);
+            }
+        }
+    }
+
+    private static Collection<String> getAllGeneralKeys() {
+        return new HashSet<>(GENERAL_KEYS.keySet());
     }
 
     private static Map<String, Object> convertJSONToMap(JSONObject json) throws JSONException {
@@ -98,10 +83,33 @@ public class PreferenceSaver {
         return map;
     }
 
-    private static Collection<String> getAllGeneralKeys() {
-        Collection<String> keys = new HashSet<>(GENERAL_KEYS.keySet());
-        keys.add(KEY_PASSWORD);
-        return keys;
+    public void fromJSON(String content, @Nullable ActionListener listener) {
+        try {
+            JSONObject settingsJson = new JSONObject(content);
+            Map<String, Object> generalPrefs = convertJSONToMap(settingsJson.getJSONObject("general"));
+            Map<String, Object> adminPrefsJson = convertJSONToMap(settingsJson.getJSONObject("admin"));
+
+            if (!(new PreferenceValidator(GENERAL_KEYS).isValid(generalPrefs))) {
+                if (listener != null) {
+                    listener.onFailure(new GeneralSharedPreferences.ValidationException());
+                }
+
+                return;
+            }
+
+            saveGeneralPrefs(generalSharedPreferences, generalPrefs);
+            saveAdminPrefs(adminSharedPreferences, adminPrefsJson);
+
+            AutoSendPreferenceMigrator.migrate(settingsJson.getJSONObject("general"));
+
+            if (listener != null) {
+                listener.onSuccess();
+            }
+        } catch (JSONException exception) {
+            if (listener != null) {
+                listener.onFailure(exception);
+            }
+        }
     }
 
     private static Collection<String> getAllAdminKeys() {

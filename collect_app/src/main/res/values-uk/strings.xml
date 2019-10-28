@@ -12,8 +12,6 @@
   <string name="add_another_repeat">Додати ще \"%s\" групу?</string>
   <string name="add_repeat">Додати нову \"%s\" групу?</string>
   <string name="add_repeat_no">Не додавати</string>
-  <string name="audio_file_error">Не вказано жодного аудіофайлу</string>
-  <string name="audio_file_invalid">Файл: %s не є аудіофайлом</string>
   <string name="cancel">Скасувати</string>
   <string name="cancel_loading_form">Скасувати</string>
   <string name="cancel_location">Скасувати</string>
@@ -154,7 +152,6 @@
   <string name="root_namespace_error">Кореневий елемент має некоректну назву: %s</string>
   <string name="manifest_tag_error">В записі маніфесту  %s є один або більше пропущені теги: filename, hash, чи downloadUrl</string>
   <string name="form_download_progress">%1$s. Отримання медіа файлу: %2$s з %3$s</string>
-  <string name="file_fetch_failed">Помилка: %2$s (%3$s) в %1$s</string>
   <string name="fetching_manifest">%s. Отримання маніфесту</string>
   <string name="success">Успішно!</string>
   <string name="failures">Невдалі</string>
@@ -307,24 +304,20 @@
   <string name="leave_a_review">Залишити відгук в Play Store</string>
   <string name="leave_a_review_msg">Ваш (сподіваємось позитивний) відгук покращить помітність програми в Play Store.</string>
   <!--Geo string added in feature-geofeatures branch-->
-  <string name="map_sdk_selector_title">SDK для мапування</string>
-  <string name="map_sdk_behavior">SDK для мапування</string>
-  <string name="google_maps_sdk">Google Карти SDK</string>
-  <string name="openstreetmap_sdk">OpenStreetMap SDK</string>
-  <string name="show_map_sdk">Відобразити налаштування Map SDK</string>
-  <string name="openmap_streets">OSM Вулиці</string>
+    <!--TODO(ping): Delete these openmap_* strings when we're ready to move on from OSMDroid.
+        These strings are only being used to preserve compatibility with pre-existing
+         tile caches, and are not shown in the UI.-->
   <string name="openmap_usgs_topo">USGS топографічна національна карта</string>
   <string name="openmap_usgs_sat">USGS Національна мапа Гібрид</string>
   <string name="openmap_usgs_img">USGS Національна мапа Картинки</string>
   <string name="openmap_stamen_terrain">Stamen Ландшафт</string>
   <string name="openmap_cartodb_positron">CartoDB Positron</string>
   <string name="openmap_cartodb_darkmatter">CartoDB Dark Matter</string>
+    <string name="basemap">Базова мапа</string>
   <string name="streets">Вулиці</string>
   <string name="terrain">Ландшафт</string>
   <string name="hybrid">Змішана</string>
   <string name="satellite">Супутник</string>
-  <string name="map_basemap_selector_title">Базова мапа</string>
-  <string name="show_map_basemap">Показати параметри базової мапи</string>
   <string name="save_point">Зберегти ГеоТочку</string>
   <string name="get_point">Записати ГеоТочку</string>
   <string name="geopoint_view_read_only">Переглянути ГеоТочку</string>
@@ -335,8 +328,6 @@
   <string name="start">Почати</string>
   <string name="enable_gps">Увімкнути GPS</string>
   <string name="geotrace_title">ГеоМаршрут</string>
-  <string name="gps_enable_message">GPS на Вашому пристрої вимкнено. Бажаєте увімкнути?</string>
-  <string name="select_offline_layer">Обрати офлайн шар</string>
   <string name="geo_clear_warning">Ознака вже створена. Бажаєте очистити ознаку?</string>
   <string name="geo_exit_warning">Скасувати зміни і повернутись до ODK?</string>
   <string name="polygon_validator">Для багатокутника необхідно мінімум 3 точки</string>
@@ -367,9 +358,6 @@
     <item quantity="other">%d метрів</item>
   </plurals>
   <string name="location_status_searching">Пошук розташування GPS, будь ласка, зачекайте…</string>
-  <string name="location_status_accuracy">Точність GPS розташування: %.1f м</string>
-  <string name="location_status_acceptable">Точність GPS розташування: %.1f м (прийнятна)</string>
-  <string name="location_status_unacceptable">Точність GPS розташування: %.1f м (неприйнятна)</string>
   <string name="collection_status_paused">Введених точок: %d</string>
   <string name="collection_status_placement">Введених точок: %d (ткніть для розміщення точок)</string>
   <string name="collection_status_manual">Введених точок: %d (ручний запис)</string>
@@ -519,7 +507,6 @@
   <string name="wifi_autosend">Тільки Wi-Fi</string>
   <string name="cellular_autosend">Тільки мобільна мережа</string>
   <string name="wifi_cellular_autosend">Wi-Fi або мобільна мережа</string>
-  <string name="map_basemap_behavior_title">Базова мапа</string>
   <string name="form_management_preferences">Управління анкетою</string>
   <string name="form_submission_category">Відправка анкети</string>
   <string name="form_filling_category">Заповнення анкети</string>
@@ -533,7 +520,6 @@
   <string name="type">Тип</string>
   <string name="form_entry">Зніміть позначку аби прибрати з Заповнити Анкету</string>
   <string name="use_device_language">Використовувати мову пристрою</string>
-  <string name="not_supported_offline_layer_format">Обраний локальний файл використовує формат PBF, що не підтримується!</string>
   <string name="invalid_email_address">Некоректна електронна адреса!</string>
   <string name="sort_by">Сортувати за</string>
   <string name="server">Сервер</string>
@@ -593,6 +579,7 @@
   <string name="islamic_month_10">Шаваль</string>
   <string name="islamic_month_11">Ду аль-кідах</string>
   <string name="islamic_month_12">Ду аль-хіджах</string>
+    <string name="persian_month_4">Тір</string>
   <string name="moving_backwards_title">Переміщення назад</string>
   <string name="moving_backwards_disabled_title">Переміщення назад відключене</string>
   <string name="moving_backwards_disabled_message">Бажаєте налаштувати цей пристрій аби заборонити користувачам оминати ці налаштування?\n\nВнесені зміни:\n\u2022 Відключено Виправити Збережену Анкету\n\u2022 Відключено Зберегти Анкету\n\u2022 Відключено Швидкій Перехід\n\u2022 Обробка обмежень встановлена на Перевіряти під час переходу вперед</string>

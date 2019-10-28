@@ -1,0 +1,30 @@
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa"
+    xmlns="http://www.w3.org/2002/xforms">
+    <h:head>
+        <h:title>emptyGroupFieldList</h:title>
+        <model>
+            <instance>
+                <data id="build_emptyGroupFieldList_1538592237">
+                    <meta>
+                        <instanceID />
+                    </meta>
+                    <g></g>
+                </data>
+            </instance>
+            <itext>
+                <translation lang="English">
+                    <text id="/data/g:label">
+                        <value>g</value>
+                    </text>
+                </translation>
+            </itext>
+            <bind calculate="concat('uuid:', uuid())" nodeset="/data/meta/instanceID"
+                readonly="true()" type="string" />
+        </model>
+    </h:head>
+    <h:body>
+        <group appearance="field-list">
+            <label ref="jr:itext('/data/g:label')" />
+        </group>
+    </h:body>
+</h:html>

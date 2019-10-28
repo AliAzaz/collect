@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,12 +57,12 @@ public class ExternalSQLiteOpenHelper extends SQLiteOpenHelper {
     private ExternalDataReader externalDataReader;
     private FormLoaderTask formLoaderTask;
 
-    public ExternalSQLiteOpenHelper(File dbFile) {
+    ExternalSQLiteOpenHelper(File dbFile) {
         super(new DatabaseContext(dbFile.getParentFile().getAbsolutePath()), dbFile.getName(), null, VERSION);
     }
 
-    public void importFromCSV(File dataSetFile, ExternalDataReader externalDataReader,
-            FormLoaderTask formLoaderTask) {
+    void importFromCSV(File dataSetFile, ExternalDataReader externalDataReader,
+                       FormLoaderTask formLoaderTask) {
         this.dataSetFile = dataSetFile;
         this.externalDataReader = externalDataReader;
         this.formLoaderTask = formLoaderTask;
@@ -104,7 +105,7 @@ public class ExternalSQLiteOpenHelper extends SQLiteOpenHelper {
 
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new InputStreamReader(new FileInputStream(dataSetFile), "UTF-8"),
+            reader = new CSVReader(new InputStreamReader(new FileInputStream(dataSetFile), StandardCharsets.UTF_8),
                     DELIMITING_CHAR, QUOTE_CHAR, ESCAPE_CHAR);
             String[] headerRow = reader.readNext();
 
@@ -127,7 +128,7 @@ public class ExternalSQLiteOpenHelper extends SQLiteOpenHelper {
                                 conflictingColumns));
             }
 
-            Map<String, String> columnNamesCache = new HashMap<String, String>();
+            Map<String, String> columnNamesCache = new HashMap<>();
 
             StringBuilder sb = new StringBuilder();
 
@@ -169,7 +170,7 @@ public class ExternalSQLiteOpenHelper extends SQLiteOpenHelper {
             // create the indexes.
             // save the sql for later because inserts will be much faster if we don't have
             // indexes already.
-            List<String> createIndexesCommands = new ArrayList<String>();
+            List<String> createIndexesCommands = new ArrayList<>();
             for (String header : headerRow) {
                 if (header.endsWith("_key")) {
                     String indexSQL = "CREATE INDEX " + header + "_idx ON " + tableName + " ("

@@ -2,13 +2,10 @@
 <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar"
+    style="@style/Widget.Collect.Toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="@color/amber_500"
+    android:background="?attr/colorPrimary"
     android:minHeight="?attr/actionBarSize"
-    app:contentInsetEnd="0dp"
-    app:contentInsetStart="0dp"
-    app:contentInsetStartWithNavigation="0dp"
-    app:navigationIcon="@drawable/akulogo"
-    app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-    app:titleTextColor="@android:color/white" />
+    app:navigationIcon="@drawable/notes"
+    app:theme="@style/ThemeOverlay.AppCompat.ActionBar" />

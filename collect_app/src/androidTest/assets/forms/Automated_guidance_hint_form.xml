@@ -1,0 +1,35 @@
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa"
+    xmlns="http://www.w3.org/2002/xforms">
+    <h:head>
+        <h:title>Guidance Form Sample</h:title>
+        <model>
+            <instance>
+                <data id="build_Untitled-Form_1523119398">
+                    <meta>
+                        <instanceID />
+                    </meta>
+                    <TriggerWidget />
+                </data>
+            </instance>
+            <itext>
+                <translation lang="English">
+                    <text id="/data/TriggerWidget:label">
+                        <value>Trigger</value>
+                    </text>
+                    <text id="/data/TriggerWidget:hint">
+                        <value>TriggerWidget</value>
+                        <value form="guidance">Guidance text</value>
+                    </text>
+                </translation>
+            </itext>
+            <bind calculate="concat('uuid:', uuid())" nodeset="/data/meta/instanceID"
+                readonly="true()" type="string" />
+        </model>
+    </h:head>
+    <h:body>
+        <trigger ref="/data/TriggerWidget">
+            <label ref="jr:itext('/data/TriggerWidget:label')" />
+            <hint ref="jr:itext('/data/TriggerWidget:hint')" />
+        </trigger>
+    </h:body>
+</h:html>

@@ -1,0 +1,40 @@
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa"
+    xmlns="http://www.w3.org/2002/xforms">
+    <h:head>
+        <h:title>OnePageFormValid</h:title>
+        <model>
+            <instance>
+                <data id="build_OnePageFormValid_1526381017">
+                    <meta>
+                        <instanceID />
+                    </meta>
+                    <one-page>
+                        <text />
+                    </one-page>
+                </data>
+            </instance>
+            <itext>
+                <translation lang="English">
+                    <text id="/data/one-page:label">
+                        <value>One page</value>
+                    </text>
+                    <text id="/data/one-page/text:label">
+                        <value>Text</value>
+                    </text>
+                </translation>
+            </itext>
+            <bind calculate="concat('uuid:', uuid())" nodeset="/data/meta/instanceID"
+                readonly="true()" type="string" />
+            <bind constraint="(regex(., &quot;^.{5,15}$&quot;))" nodeset="/data/one-page/text"
+                type="string" jr:constraintMsg="Response length must be between 5 and 15" />
+        </model>
+    </h:head>
+    <h:body>
+        <group appearance="field-list">
+            <label ref="jr:itext('/data/one-page:label')" />
+            <input ref="/data/one-page/text">
+                <label ref="jr:itext('/data/one-page/text:label')" />
+            </input>
+        </group>
+    </h:body>
+</h:html>

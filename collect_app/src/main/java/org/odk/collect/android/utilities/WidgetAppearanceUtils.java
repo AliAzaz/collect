@@ -19,12 +19,13 @@ package org.odk.collect.android.utilities;
 import android.content.Context;
 import android.content.res.Configuration;
 
+import androidx.annotation.NonNull;
+
 import org.javarosa.form.api.FormEntryPrompt;
 import org.odk.collect.android.external.ExternalDataUtil;
 
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
 import timber.log.Timber;
 
 public class WidgetAppearanceUtils {
@@ -85,8 +86,8 @@ public class WidgetAppearanceUtils {
     }
 
     // Get appearance hint and clean it up so it is lower case, without the search function and never null.
-    @NonNull
-    public static String getSanitizedAppearanceHint(FormEntryPrompt fep) {
+    public static @NonNull
+    String getSanitizedAppearanceHint(FormEntryPrompt fep) {
         String appearance = fep.getAppearanceHint();
         if (appearance == null) {
             appearance = NO_APPEARANCE;
@@ -101,6 +102,13 @@ public class WidgetAppearanceUtils {
         }
 
         return appearance;
+    }
+
+    /**
+     * Returns whether an appearance is present.  (Appearances are the constants above.)
+     */
+    public static boolean hasAppearance(FormEntryPrompt fep, String appearance) {
+        return getSanitizedAppearanceHint(fep).contains(appearance);
     }
 
     /*
@@ -161,5 +169,9 @@ public class WidgetAppearanceUtils {
 
     public static boolean isCompactAppearance(FormEntryPrompt prompt) {
         return getSanitizedAppearanceHint(prompt).contains(COMPACT);
+    }
+
+    public static boolean useThousandSeparator(FormEntryPrompt prompt) {
+        return getSanitizedAppearanceHint(prompt).contains(WidgetAppearanceUtils.THOUSANDS_SEP);
     }
 }

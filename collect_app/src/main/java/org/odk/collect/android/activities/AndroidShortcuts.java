@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.odk.collect.android.R;
@@ -58,8 +59,8 @@ public class AndroidShortcuts extends AppCompatActivity {
      * Builds a list of shortcuts
      */
     private void buildMenuList() {
-        ArrayList<String> names = new ArrayList<String>();
-        ArrayList<Uri> commands = new ArrayList<Uri>();
+        ArrayList<String> names = new ArrayList<>();
+        ArrayList<Uri> commands = new ArrayList<>();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.select_odk_shortcut);

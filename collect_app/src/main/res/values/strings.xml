@@ -22,8 +22,6 @@
     <string name="add_another_repeat">Add another \"%s\" group?</string>
     <string name="add_repeat">Add a new \"%s\" group?</string>
     <string name="add_repeat_no">Do Not Add</string>
-    <string name="audio_file_error">No audio file was specified.</string>
-    <string name="audio_file_invalid">File: %s is not a valid audio file.</string>
     <string name="cancel">Cancel</string>
     <string name="cancel_loading_form">Cancel</string>
     <string name="cancel_location">Cancel</string>
@@ -164,7 +162,6 @@
     <string name="root_namespace_error">Root element Namespace is incorrect: %s</string>
     <string name="manifest_tag_error">Manifest entry %s is missing one or more tags: filename, hash, or downloadUrl</string>
     <string name="form_download_progress">%1$s. Getting media files: %2$s of %3$s</string>
-    <string name="file_fetch_failed">Error: %2$s (%3$s) at %1$s</string>
     <string name="fetching_manifest">%s. Getting manifest </string>
     <string name="success">Success</string>
     <string name="failures">Failures</string>
@@ -314,32 +311,39 @@
     <!-- Geo string added in feature-geofeatures branch-->
 
     <string name="maps">Maps</string>
-    <string name="map_sdk_selector_title">Mapping SDK</string>
-    <string name="map_sdk_behavior">Mapping SDK</string>
-    <string name="google_maps_sdk">Google Maps SDK</string>
-    <string name="openstreetmap_sdk">OpenStreetMap SDK</string>
-    <string name="mapbox_maps_sdk">Mapbox Maps SDK</string>
-    <string name="show_map_sdk">Show Map SDK Options</string>
-    <string name="openmap_streets">OSM Streets</string>
+
+    <!--
+      TODO(ping): Delete these openmap_* strings when we're ready to move on from OSMDroid.
+      These strings are only being used to preserve compatibility with pre-existing
+       tile caches, and are not shown in the UI.
+    -->
     <string name="openmap_usgs_topo">USGS National Map Topo</string>
     <string name="openmap_usgs_sat">USGS National Map Hybrid</string>
     <string name="openmap_usgs_img">USGS National Map Imagery</string>
     <string name="openmap_stamen_terrain">Stamen Terrain</string>
     <string name="openmap_cartodb_positron">CartoDB Positron</string>
     <string name="openmap_cartodb_darkmatter">CartoDB Dark Matter</string>
+
+    <string name="basemap">Basemap</string>
+    <string name="basemap_source">Source</string>
+    <string name="map_style_label">%s map style</string>
+
     <string name="streets">Streets</string>
     <string name="terrain">Terrain</string>
     <string name="hybrid">Hybrid</string>
     <string name="satellite">Satellite</string>
-    <string name="map_basemap_selector_title">Basemaps</string>
-    <string name="show_map_basemap">Show Basemap Options</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="outdoors">Outdoors</string>
+    <string name="topographic">Topographic</string>
 
-    <string name="mapbox_streets">Mapbox Streets</string>
-    <string name="mapbox_light">Mapbox Light</string>
-    <string name="mapbox_dark">Mapbox Dark</string>
-    <string name="mapbox_satellite">Mapbox Satellite</string>
-    <string name="mapbox_satellite_streets">Mapbox Satellite Streets</string>
-    <string name="mapbox_outdoors">Mapbox Outdoors</string>
+    <string name="carto_map_style_positron">Positron</string>
+    <string name="carto_map_style_dark_matter">Dark Matter</string>
+
+    <string name="reference_layer">Reference layer</string>
+    <string name="layer_data_caption_none">There are no layer files in %1$s that are supported by the %2$s basemap.</string>
+    <string name="layer_data_caption">Above are all the layer files in %1$s that are supported by the %2$s basemap.</string>
+    <string name="layer_data_file">Layer data file</string>
 
     <string name="save_point">Save GeoPoint</string>
     <string name="get_point">Start GeoPoint</string>
@@ -352,8 +356,7 @@
     <string name="start">Start</string>
     <string name="enable_gps">Enable GPS</string>
     <string name="geotrace_title">GeoTrace</string>
-    <string name="gps_enable_message">GPS is disabled in your device. Would you like to enable it?</string>
-    <string name="select_offline_layer">Select Offline Layer</string>
+    <string name="gps_enable_message">GPS is disabled on your device. Would you like to enable it?</string>
     <string name="geo_clear_warning">Feature already created. Would you like to clear the feature?</string>
     <string name="geo_exit_warning">Discard changes and return to ODK?</string>
     <string name="polygon_validator">Must have at least 3 points to create Polygon</string>
@@ -378,9 +381,9 @@
         <item quantity="other">%d meters</item>
     </plurals>
     <string name="location_status_searching">Searching for GPS location, please wait&#8230;</string>
-    <string name="location_status_accuracy">GPS location accuracy: %.1f m</string>
-    <string name="location_status_acceptable">GPS location accuracy: %.1f m (acceptable)</string>
-    <string name="location_status_unacceptable">GPS location accuracy: %.1f m (unacceptable)</string>
+    <string name="location_status_accuracy">GPS location accuracy: %.2f m</string>
+    <string name="location_status_acceptable">GPS location accuracy: %.2f m (acceptable)</string>
+    <string name="location_status_unacceptable">GPS location accuracy: %.2f m (unacceptable)</string>
     <string name="collection_status_paused">Points entered: %d</string>
     <string name="collection_status_placement">Points entered: %d (tap to place points)</string>
     <string name="collection_status_manual">Points entered: %d (manual recording)</string>
@@ -532,7 +535,6 @@
     <string name="wifi_autosend">Wifi only</string>
     <string name="cellular_autosend">Cellular only</string>
     <string name="wifi_cellular_autosend">Wifi or cellular</string>
-    <string name="map_basemap_behavior_title">Basemap</string>
     <string name="form_management_preferences">Form management</string>
     <string name="form_submission_category">Form submission</string>
     <string name="form_filling_category">Form filling</string>
@@ -546,7 +548,6 @@
     <string name="type">Type</string>
     <string name="form_entry">Uncheck to hide from Form Entry</string>
     <string name="use_device_language">Use device language</string>
-    <string name="not_supported_offline_layer_format">Selected offline layer file uses the PBF format which is not supported!</string>
     <string name="invalid_email_address">Invalid email address!</string>
     <string name="sort_by">Sort by</string>
     <string name="server">Server</string>
@@ -713,11 +714,5 @@
     <string name="copying_media_files_failed">Copying media files failed</string>
     <string name="qr_code_not_found">QR Code not found in the selected image</string>
     <string name="not_granted_permission">The activity you are trying to start requires a permission which is not granted.</string>
-    <string name="mapbox_unsupported_warning">Mapbox is not supported on this device (%s).  Please choose another mapping SDK in General Settings &gt; User interface.</string>
-
-
-    <!--Ali-->
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_field_required">This field is required</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="basemap_source_unavailable">Sorry, %s basemaps are not available on this device.  Please choose another basemap in General Settings &gt; Maps.</string>
 </resources>

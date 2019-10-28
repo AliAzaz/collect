@@ -1,6 +1,7 @@
 package org.odk.collect.android.adapters;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,14 +15,14 @@ import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.utilities.ThemeUtils;
 
-public class SpinnerAdapter extends ArrayAdapter<String> {
+public class SpinnerAdapter extends ArrayAdapter<CharSequence> {
     private final Context context;
-    private final String[] items;
+    private final CharSequence[] items;
     private final ThemeUtils themeUtils;
     private int selectedPosition;
 
-    public SpinnerAdapter(final Context context, final String[] objects) {
-        super(context, android.R.layout.simple_spinner_item, objects);
+    public SpinnerAdapter(final Context context, final CharSequence[] objects) {
+        super(context, android.R.layout.simple_list_item_1, objects);
         this.items = objects;
         this.context = context;
         themeUtils = new ThemeUtils(context);
@@ -33,12 +34,10 @@ public class SpinnerAdapter extends ArrayAdapter<String> {
 
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(context);
-            convertView = inflater.inflate(android.R.layout.simple_spinner_dropdown_item, parent, false);
+            convertView = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
         }
 
-        if (themeUtils.isDarkTheme()) {
-            convertView.setBackgroundColor(context.getResources().getColor(R.color.darkPopupDialogColor));
-        }
+        setBackgroundColor(convertView);
 
         TextView tv = convertView.findViewById(android.R.id.text1);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, Collect.getQuestionFontsize());
@@ -66,7 +65,7 @@ public class SpinnerAdapter extends ArrayAdapter<String> {
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(context);
-            convertView = inflater.inflate(android.R.layout.simple_spinner_item, parent, false);
+            convertView = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
         }
 
         TextView tv = convertView.findViewById(android.R.id.text1);
@@ -79,5 +78,14 @@ public class SpinnerAdapter extends ArrayAdapter<String> {
 
     public void updateSelectedItemPosition(int selectedPosition) {
         this.selectedPosition = selectedPosition;
+    }
+
+    private void setBackgroundColor(View convertView) {
+        TypedValue typedValue = new TypedValue();
+
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(R.attr.spinnerItemBackgroundColor, typedValue, true);
+
+        convertView.setBackgroundColor(typedValue.data);
     }
 }

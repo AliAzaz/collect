@@ -16,21 +16,21 @@
 
 package org.odk.collect.android.adapters;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatCheckBox;
-import androidx.core.content.ContextCompat;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.core.content.ContextCompat;
+
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.core.model.data.helper.Selection;
-import org.odk.collect.android.views.MediaLayout;
-import org.odk.collect.android.widgets.SelectWidget;
 import org.odk.collect.android.R;
+import org.odk.collect.android.formentry.questions.AudioVideoImageTextLabel;
+import org.odk.collect.android.widgets.SelectWidget;
 
 import java.util.List;
 
@@ -47,7 +47,35 @@ public class SelectMultipleListAdapter extends AbstractSelectListAdapter {
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(noButtonsMode
                 ? LayoutInflater.from(parent.getContext()).inflate(R.layout.select_item_layout, null)
-                : new MediaLayout(parent.getContext()));
+                : new AudioVideoImageTextLabel(parent.getContext()));
+    }
+
+    @Override
+    CheckBox setUpButton(final int index) {
+        AppCompatCheckBox checkBox = new AppCompatCheckBox(widget.getContext());
+        adjustButton(checkBox, index);
+        checkCheckBoxIfNeeded(checkBox, index); // perform before setting onCheckedChangeListener to avoid redundant calls of its body
+
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                addItem(filteredItems.get(index).selection());
+            } else {
+                removeItem(filteredItems.get(index).selection());
+            }
+            widget.widgetValueChanged();
+        });
+
+        return checkBox;
+    }
+
+    private void checkCheckBoxIfNeeded(CheckBox checkBox, int index) {
+        for (Selection selectedItem : selectedItems) {
+            // match based on value, not key
+            if (filteredItems.get(index).getValue().equals(selectedItem.getValue())) {
+                checkBox.setChecked(true);
+                break;
+            }
+        }
     }
 
     class ViewHolder extends AbstractSelectListAdapter.ViewHolder {
@@ -56,8 +84,8 @@ public class SelectMultipleListAdapter extends AbstractSelectListAdapter {
             if (noButtonsMode) {
                 view = (FrameLayout) v;
             } else {
-                mediaLayout = (MediaLayout) v;
-                widget.initMediaLayoutSetUp(mediaLayout);
+                audioVideoImageTextLabel = (AudioVideoImageTextLabel) v;
+                widget.init(audioVideoImageTextLabel);
             }
         }
 
@@ -72,26 +100,6 @@ public class SelectMultipleListAdapter extends AbstractSelectListAdapter {
                 }
             }
         }
-    }
-
-    @Override
-    CheckBox setUpButton(final int index) {
-        AppCompatCheckBox checkBox = new AppCompatCheckBox(widget.getContext());
-        adjustButton(checkBox, index);
-        checkBox.setOnClickListener(v -> {
-            onItemClick(filteredItems.get(index).selection(), null);
-            widget.widgetValueChanged();
-        });
-
-        for (Selection selectedItem : selectedItems) {
-            // match based on value, not key
-            if (filteredItems.get(index).getValue().equals(selectedItem.getValue())) {
-                checkBox.setChecked(true);
-                break;
-            }
-        }
-
-        return checkBox;
     }
 
     @Override

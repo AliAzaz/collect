@@ -11,13 +11,10 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.odk.collect.android.R;
-import org.odk.collect.android.espressoutils.FormEntry;
-import org.odk.collect.android.espressoutils.MainMenu;
+import org.odk.collect.android.espressoutils.pages.MainMenuPage;
 import org.odk.collect.android.support.CopyFormRule;
 import org.odk.collect.android.support.ResetStateRule;
 import org.odk.collect.android.support.ScreenshotOnFailureTestRule;
-
-import static androidx.test.espresso.Espresso.pressBack;
 
 // Issue number NODK-211
 @RunWith(AndroidJUnit4.class)
@@ -27,10 +24,11 @@ public class SignatureWidgetTest extends BaseRegressionTest {
     public RuleChain copyFormChain = RuleChain
             .outerRule(GrantPermissionRule.grant(
                     Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_PHONE_STATE)
             )
             .around(new ResetStateRule())
-            .around(new CopyFormRule("All_widgets.xml", "regression/"));
+            .around(new CopyFormRule("All_widgets.xml"));
 
     @Rule
     public TestRule screenshotFailRule = new ScreenshotOnFailureTestRule();
@@ -39,42 +37,50 @@ public class SignatureWidgetTest extends BaseRegressionTest {
     public void saveIgnoreDialog_ShouldUseBothOptions() {
 
         //TestCase1
-        MainMenu.startBlankForm("All widgets");
-        FormEntry.clickGoToIconInForm();
-        FormEntry.clickOnText("Image widgets");
-        FormEntry.clickOnText("Signature widget");
-        FormEntry.clickSignatureButton();
-        pressBack();
-        FormEntry.checkIsTextDisplayed("Exit Gather Signature");
-        FormEntry.checkIsStringDisplayed(R.string.keep_changes);
-        FormEntry.clickOnString(R.string.do_not_save);
-        FormEntry.clickSignatureButton();
-        pressBack();
-        FormEntry.clickOnString(R.string.keep_changes);
-        FormEntry.clickGoToIconInForm();
-        FormEntry.clickJumpEndButton();
-        FormEntry.clickSaveAndExit();
+        new MainMenuPage(main)
+                .startBlankForm("All widgets")
+                .clickGoToIconInForm()
+                .clickOnText("Image widgets")
+                .clickOnText("Signature widget")
+                .clickSignatureButton()
+                .waitForRotationToEnd()
+                .simplePressBack()
+                .checkIsTranslationDisplayed("Exit Gather Signature", "Salir Adjuntar firma")
+                .checkIsStringDisplayed(R.string.keep_changes)
+                .clickOnString(R.string.do_not_save)
+                .waitForRotationToEnd()
+                .clickSignatureButton()
+                .waitForRotationToEnd()
+                .simplePressBack()
+                .clickOnString(R.string.keep_changes)
+                .waitForRotationToEnd()
+                .clickGoToIconInForm()
+                .clickJumpEndButton()
+                .clickSaveAndExit();
     }
 
     @Test
     public void multiClickOnPlus_ShouldDisplayIcons() {
 
         //TestCase2
-        MainMenu.startBlankForm("All widgets");
-        FormEntry.clickGoToIconInForm();
-        FormEntry.clickOnText("Image widgets");
-        FormEntry.clickOnText("Signature widget");
-        FormEntry.clickSignatureButton();
-        FormEntry.clickOnId(R.id.fab_actions);
-        FormEntry.checkIsIdDisplayed(R.id.fab_save_and_close);
-        FormEntry.clickOnId(R.id.fab_set_color);
-        FormEntry.clickOnString(R.string.ok);
-        FormEntry.clickOnId(R.id.fab_actions);
-        FormEntry.checkIsIdDisplayed(R.id.fab_set_color);
-        pressBack();
-        FormEntry.clickOnString(R.string.keep_changes);
-        FormEntry.clickGoToIconInForm();
-        FormEntry.clickJumpEndButton();
-        FormEntry.clickSaveAndExit();
+        new MainMenuPage(main)
+                .startBlankForm("All widgets")
+                .clickGoToIconInForm()
+                .clickOnText("Image widgets")
+                .clickOnText("Signature widget")
+                .clickSignatureButton()
+                .waitForRotationToEnd()
+                .clickOnId(R.id.fab_actions)
+                .checkIsIdDisplayed(R.id.fab_save_and_close)
+                .clickOnId(R.id.fab_set_color)
+                .clickOnString(R.string.ok)
+                .clickOnId(R.id.fab_actions)
+                .checkIsIdDisplayed(R.id.fab_set_color)
+                .simplePressBack()
+                .clickOnString(R.string.keep_changes)
+                .waitForRotationToEnd()
+                .clickGoToIconInForm()
+                .clickJumpEndButton()
+                .clickSaveAndExit();
     }
 }

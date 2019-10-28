@@ -1,12 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
   <string name="activity_not_found">Nerasta, kas galėtų valdyti: %s</string>
   <string name="add_another">Sukurti grupę</string>
   <string name="add_another_repeat">Sukurti kitą \"%s\" grupę?</string>
   <string name="add_repeat">Sukurti naują \"%s\" grupę?</string>
   <string name="add_repeat_no">Nekurti</string>
-  <string name="audio_file_error">Nebuvo nurodytas joks audio failas.</string>
-  <string name="audio_file_invalid">Failas: %s nėra tinkamas audio failas.</string>
   <string name="cancel">Atšaukti</string>
   <string name="cancel_loading_form">Atšaukti</string>
   <string name="cancel_location">Atšaukti</string>
@@ -126,7 +124,6 @@
   <string name="root_namespace_error">Šakninio elemento vardų erdvė neteisinga: %s</string>
   <string name="manifest_tag_error">Manifesto įvestyje %s trūksta vienos ar keleto žymų: filename, hash, arba downloadUrl</string>
   <string name="form_download_progress">%1$s. Siunčiami medijos failai: %2$s iš %3$s</string>
-  <string name="file_fetch_failed">Klaida: %2$s (%3$s) iš %1$s</string>
   <string name="fetching_manifest">%s. Siunčiamas manifestas</string>
   <string name="success">Sėkmingai</string>
   <string name="no_forms_uploaded">Deja, formos nepavyko išsiųsti.</string>
@@ -191,6 +188,9 @@
   <string name="no_printer">The requested printer is not installed. Please install the printer.</string>
   <string name="change_server_url">Serverio URL</string>
   <!--Geo string added in feature-geofeatures branch-->
+    <!--TODO(ping): Delete these openmap_* strings when we're ready to move on from OSMDroid.
+        These strings are only being used to preserve compatibility with pre-existing
+         tile caches, and are not shown in the UI.-->
   <!--&lt; and &gt; surrounds the text so it will appear as <no form loaded>-->
   <!--%1$s represents degrees, %2$s represents minutes and %3$s represents seconds as in W 18°48'8"-->
   <!--%1$s represents degrees, %2$s represents minutes and %3$s represents seconds as in E 18°48'8"-->

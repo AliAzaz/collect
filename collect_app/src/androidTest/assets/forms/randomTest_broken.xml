@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa"
+    xmlns="http://www.w3.org/2002/xforms">
+    <h:head>
+        <h:title>random test</h:title>
+        <model>
+            <itext>
+                <translation default="true()" lang="English">
+                    <text id="/randomTest_broken/selectedNote:label">
+                        <value>
+                            Your random number was
+                            <output value=" /randomTest_broken/randNum " />
+                            . For this survey, please interview mother
+                            <output value=" /randomTest_broken/selected " />
+                            . Thank the other eligible women (if any) for their time and tell them
+                            you will only need to speak to mother
+                            <output value=" /randomTest_broken/selected " />
+                            .
+                        </value>
+                    </text>
+                    <text id="/randomTest_broken/cGroup1/c2:label">
+                        <value>How many women in the household are pregnant or have young
+                            children?
+                        </value>
+                    </text>
+                    <text id="/randomTest_broken/cGroup1/c2:jr:constraintMsg">
+                        <value>Number must between 0 and 10</value>
+                    </text>
+                </translation>
+            </itext>
+            <instance>
+                <randomTest_broken id="randomTest" version="2018041801">
+                    <cGroup1>
+                        <c2 />
+                    </cGroup1>
+                    <randNum />
+                    <selected />
+                    <selectedNote />
+                    <meta>
+                        <instanceID />
+                    </meta>
+                </randomTest_broken>
+            </instance>
+            <bind nodeset="/randomTest_broken/deviceid" type="string" jr:preload="property"
+                jr:preloadParams="deviceid" />
+            <bind nodeset="/randomTest_broken/username" type="string" jr:preload="property"
+                jr:preloadParams="username" />
+            <bind nodeset="/randomTest_broken/start" type="dateTime" jr:preload="timestamp"
+                jr:preloadParams="start" />
+            <bind nodeset="/randomTest_broken/end" type="dateTime" jr:preload="timestamp"
+                jr:preloadParams="end" />
+            <bind nodeset="/randomTest_broken/today" type="date" jr:preload="date"
+                jr:preloadParams="today" />
+            <bind constraint=".&gt;=0 and .&lt;=10" nodeset="/randomTest_broken/cGroup1/c2"
+                required="true()" type="int"
+                jr:constraintMsg="jr:itext('/randomTest_broken/cGroup1/c2:jr:constraintMsg')" />
+            <bind calculate="once(random())" nodeset="/randomTest_broken/randNum" type="string" />
+            <bind calculate="int( /randomTest_broken/randNum * /randomTest_broken/cGroup1/c2 )+1"
+                nodeset="/randomTest_broken/selected" type="string" />
+            <bind nodeset="/randomTest_broken/selectedNote" readonly="true()" type="string" />
+            <bind calculate="concat('uuid:', uuid())" nodeset="/randomTest_broken/meta/instanceID"
+                readonly="true()" type="string" />
+        </model>
+    </h:head>
+    <h:body class="pages">
+        <group appearance="field-list" ref="/randomTest_broken/cGroup1">
+            <input ref="/randomTest_broken/cGroup1/c2">
+                <label ref="jr:itext('/randomTest_broken/cGroup1/c2:label')" />
+            </input>
+        </group>
+        <input ref="/randomTest_broken/selectedNote">
+            <label ref="jr:itext('/randomTest_broken/selectedNote:label')" />
+        </input>
+    </h:body>
+</h:html>

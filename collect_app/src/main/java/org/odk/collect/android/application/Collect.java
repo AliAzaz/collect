@@ -18,6 +18,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -59,6 +60,7 @@ import org.odk.collect.android.preferences.AdminSharedPreferences;
 import org.odk.collect.android.preferences.AutoSendPreferenceMigrator;
 import org.odk.collect.android.preferences.FormMetadataMigrator;
 import org.odk.collect.android.preferences.GeneralSharedPreferences;
+import org.odk.collect.android.preferences.PrefMigrator;
 import org.odk.collect.android.tasks.sms.SmsNotificationReceiver;
 import org.odk.collect.android.tasks.sms.SmsSentBroadcastReceiver;
 import org.odk.collect.android.utilities.FileUtils;
@@ -201,14 +203,19 @@ public class Collect extends Application {
 
     /**
      * Gets a unique, privacy-preserving identifier for a form based on its id and version.
-     *
-     * @param formId      id of a form
+     * @param formId id of a form
      * @param formVersion version of a form
      * @return md5 hash of the form title, a space, the form ID
      */
     public static String getFormIdentifierHash(String formId, String formVersion) {
         String formIdentifier = new FormsDao().getFormTitleForFormIdAndFormVersion(formId, formVersion) + " " + formId;
         return FileUtils.getMd5Hash(new ByteArrayInputStream(formIdentifier.getBytes()));
+    }
+
+    public String getVersionedAppName() {
+        String versionName = BuildConfig.VERSION_NAME;
+        versionName = " " + versionName.replaceFirst("-", "\n");
+        return getString(R.string.app_name) + versionName;
     }
 
     public boolean isNetworkAvailable() {
@@ -226,6 +233,19 @@ public class Collect extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
+    }
+
+    /**
+     * Get a User-Agent string that provides the platform details followed by the application ID
+     * and application version name: {@code Dalvik/<version> (platform info) org.odk.collect.android/v<version>}.
+     * <p>
+     * This deviates from the recommended format as described in https://github.com/opendatakit/collect/issues/3253.
+     */
+    public String getUserAgentString() {
+        return String.format("%s %s/%s",
+                System.getProperty("http.agent"),
+                BuildConfig.APPLICATION_ID,
+                BuildConfig.VERSION_NAME);
     }
 
     @Override
@@ -250,6 +270,11 @@ public class Collect extends Application {
             Timber.e(e);
         }
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        FormMetadataMigrator.migrate(prefs);
+        PrefMigrator.migrateSharedPrefs();
+        AutoSendPreferenceMigrator.migrate();
+
         reloadSharedPreferences();
 
         PRNGFixes.apply();
@@ -259,10 +284,7 @@ public class Collect extends Application {
         defaultSysLanguage = Locale.getDefault().getLanguage();
         new LocaleHelper().updateLocale(this);
 
-        FormMetadataMigrator.migrate(PreferenceManager.getDefaultSharedPreferences(this));
-        AutoSendPreferenceMigrator.migrate();
-
-        initProperties();
+        initializeJavaRosa();
 
         if (BuildConfig.BUILD_TYPE.equals("odkCollectRelease")) {
             Timber.plant(new CrashReportingTree());
@@ -271,6 +293,7 @@ public class Collect extends Application {
         }
 
         setupLeakCanary();
+        setupOSMDroid();
     }
 
     private void setupDagger() {
@@ -366,15 +389,8 @@ public class Collect extends Application {
         }
     }
 
-    public void initProperties() {
-        PropertyManager mgr = new PropertyManager(this);
-
-        // Use the server username by default if the metadata username is not defined
-        if (mgr.getSingularProperty(PROPMGR_USERNAME) == null || mgr.getSingularProperty(PROPMGR_USERNAME).isEmpty()) {
-            mgr.putProperty(PROPMGR_USERNAME, SCHEME_USERNAME, (String) GeneralSharedPreferences.getInstance().get(KEY_USERNAME));
-        }
-
-        FormController.initializeJavaRosa(mgr);
+    protected void setupOSMDroid() {
+        org.osmdroid.config.Configuration.getInstance().setUserAgentValue(getUserAgentString());
     }
 
     // This method reloads shared preferences in order to load default values for new preferences
@@ -425,10 +441,15 @@ public class Collect extends Application {
         return FileUtils.getMd5Hash(new ByteArrayInputStream(formIdentifier.getBytes()));
     }
 
-    public String getVersionedAppName() {
-        String versionName = BuildConfig.VERSION_NAME;
-        versionName = " " + versionName.replaceFirst("-", "\n");
-        return getString(R.string.app_name) + "\n" + versionName;
+    public void initializeJavaRosa() {
+        PropertyManager mgr = new PropertyManager(this);
+
+        // Use the server username by default if the metadata username is not defined
+        if (mgr.getSingularProperty(PROPMGR_USERNAME) == null || mgr.getSingularProperty(PROPMGR_USERNAME).isEmpty()) {
+            mgr.putProperty(PROPMGR_USERNAME, SCHEME_USERNAME, (String) GeneralSharedPreferences.getInstance().get(KEY_USERNAME));
+        }
+
+        FormController.initializeJavaRosa(mgr);
     }
 
     public void logNullFormControllerEvent(String action) {

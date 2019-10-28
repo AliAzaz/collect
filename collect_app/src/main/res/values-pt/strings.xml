@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
   <string name="show_password">Mostra a senha</string>
   <string name="activity_not_found">Não foi encontrada nenhuma atividade por ser tratada: %s</string>
   <string name="view_image">Ver Imagem</string>
@@ -7,8 +7,6 @@
   <string name="add_another_repeat">Adicionar outro grupo \"%s\"?</string>
   <string name="add_repeat">Adicionar um novo grupo \"%s\"?</string>
   <string name="add_repeat_no">Não adicionar</string>
-  <string name="audio_file_error">Não foi especificado arquivo de áudio</string>
-  <string name="audio_file_invalid">Arquivo de áudio %s inválido.</string>
   <string name="cancel">Cancelar</string>
   <string name="cancel_loading_form">Cancelar</string>
   <string name="cancel_location">Cancelar</string>
@@ -145,7 +143,6 @@
   <string name="root_namespace_error">Root element Namespace - incorreto: %s</string>
   <string name="manifest_tag_error">Entrada %s está faltando uma ou mais tags: arquivo, hash, ou downloadURL</string>
   <string name="form_download_progress">%1$s. Acessando arquivos de mídia: %2$s de %3$s</string>
-  <string name="file_fetch_failed">Erro: %2$s (%3$s) em %1$s</string>
   <string name="fetching_manifest">%s. Acessando manifesto</string>
   <string name="success">Sucesso</string>
   <string name="failures">Falhas</string>
@@ -295,21 +292,17 @@ Escolher Imagem</string>
   <string name="leave_a_review">Deixe um opinião sua na Play Store</string>
   <string name="leave_a_review_msg">A sua opinião (possivelmente positiva) aumenta a visibilidade da App na Play Store.</string>
   <!--Geo string added in feature-geofeatures branch-->
-  <string name="map_sdk_selector_title">Cartografia SDK</string>
-  <string name="map_sdk_behavior">Cartografia SDK</string>
-  <string name="google_maps_sdk">Google Maps SDK</string>
-  <string name="openstreetmap_sdk">OpenStreetMap SDK</string>
-  <string name="show_map_sdk">Opções SDK de Mostrar Mapa</string>
-  <string name="openmap_streets">Ruas OSM</string>
+    <!--TODO(ping): Delete these openmap_* strings when we're ready to move on from OSMDroid.
+        These strings are only being used to preserve compatibility with pre-existing
+         tile caches, and are not shown in the UI.-->
   <string name="openmap_usgs_topo">Mapa Topográfico Nacional USGS</string>
   <string name="openmap_usgs_sat">Mapa Híbrido Nacional USGS</string>
   <string name="openmap_usgs_img">Mapa de Imagem Nacional USGS</string>
+    <string name="basemap">Mapa base</string>
   <string name="streets">Ruas</string>
   <string name="terrain">Terreno</string>
   <string name="hybrid">Hibrido</string>
   <string name="satellite">Satélite</string>
-  <string name="map_basemap_selector_title">Mapa base</string>
-  <string name="show_map_basemap">Mostra Opções Mapa Base</string>
   <string name="save_point">Salva GeoPoint</string>
   <string name="get_point">Inicia GeoPoint</string>
   <string name="geopoint_view_read_only">Visualiza GeoPoint</string>
@@ -319,8 +312,6 @@ Escolher Imagem</string>
   <string name="start">Iniciar</string>
   <string name="enable_gps">Habilitar GPS</string>
   <string name="geotrace_title">GeoTrace</string>
-  <string name="gps_enable_message">O GPS está desabilitado em seu aparelho. Gostaria de habilitá-lo?</string>
-  <string name="select_offline_layer">Selecionar Layer Desligado</string>
   <string name="geo_clear_warning">A feature já foi criada. Gostaria de limpar a feature?</string>
   <string name="geo_exit_warning">Descartar mudanças e retornar ao ODK?</string>
   <string name="polygon_validator">Precisa ter pelo menos 3 pontos para criar Polígono</string>
@@ -466,7 +457,6 @@ Escolher Imagem</string>
   <string name="wifi_autosend">Somente wifi</string>
   <string name="cellular_autosend">Somente celular</string>
   <string name="wifi_cellular_autosend">Wifi ou celular</string>
-  <string name="map_basemap_behavior_title">Mapa base</string>
   <string name="form_management_preferences">Gestão de formulários</string>
   <string name="form_submission_category">Envio de formulários</string>
   <string name="form_filling_category">Preenchimento de formulários</string>
@@ -480,7 +470,6 @@ Escolher Imagem</string>
   <string name="type">Tipo</string>
   <string name="form_entry">Desmarque para ocultar da entrada de formulário</string>
   <string name="use_device_language">Utilizar idioma do dispositivo</string>
-  <string name="not_supported_offline_layer_format">O arquivo do layer selecionado utiliza o formato PBF que não é suportado!</string>
   <string name="invalid_email_address">Endereço de e-mail inválido!</string>
   <string name="sort_by">Organizar por</string>
   <string name="server">Servidor</string>

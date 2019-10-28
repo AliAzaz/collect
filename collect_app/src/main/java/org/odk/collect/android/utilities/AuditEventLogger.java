@@ -62,46 +62,42 @@ public class AuditEventLogger {
      */
     public void logEvent(AuditEvent.AuditEventType eventType, FormIndex formIndex,
                          boolean writeImmediatelyToDisk, String questionAnswer) {
-
-        // Ignore beginning of form and repeat events
-        if (eventType == AuditEvent.AuditEventType.BEGINNING_OF_FORM || eventType == AuditEvent.AuditEventType.REPEAT) {
+        if (!isAuditEnabled() || shouldBeIgnored(eventType)) {
             return;
         }
 
-        if (isAuditEnabled() && !isDuplicateOfLastLocationEvent(eventType)) {
-            Timber.i("AuditEvent recorded: %s", eventType);
+        Timber.i("AuditEvent recorded: %s", eventType);
 
-            AuditEvent newAuditEvent = new AuditEvent(getEventTime(), eventType, auditConfig.isLocationEnabled(),
-                    auditConfig.isTrackingChangesEnabled(), formIndex, questionAnswer);
+        AuditEvent newAuditEvent = new AuditEvent(getEventTime(), eventType, auditConfig.isLocationEnabled(),
+                auditConfig.isTrackingChangesEnabled(), formIndex, questionAnswer);
 
-            if (isDuplicatedIntervalEvent(newAuditEvent)) {
-                return;
-            }
+        if (isDuplicatedIntervalEvent(newAuditEvent)) {
+            return;
+        }
 
-            if (auditConfig.isLocationEnabled()) {
-                addLocationCoordinatesToAuditEvent(newAuditEvent);
-            }
+        if (auditConfig.isLocationEnabled()) {
+            addLocationCoordinatesToAuditEvent(newAuditEvent);
+        }
 
-            /*
-             * Close any existing interval events if the view is being exited
-             */
-            if (eventType == AuditEvent.AuditEventType.FORM_EXIT) {
-                manageSavedEvents();
-            }
+        /*
+         * Close any existing interval events if the view is being exited
+         */
+        if (eventType == AuditEvent.AuditEventType.FORM_EXIT) {
+            manageSavedEvents();
+        }
 
-            auditEvents.add(newAuditEvent);
+        auditEvents.add(newAuditEvent);
 
-            /*
-             * Write the event unless it is an interval event in which case we need to wait for the end of that event
-             */
-            if (writeImmediatelyToDisk && !newAuditEvent.isIntervalAuditEventType()) {
-                writeEvents();
-            }
+        /*
+         * Write the event unless it is an interval event in which case we need to wait for the end of that event
+         */
+        if (writeImmediatelyToDisk && !newAuditEvent.isIntervalAuditEventType()) {
+            writeEvents();
         }
     }
 
     private void addLocationCoordinatesToAuditEvent(AuditEvent auditEvent) {
-        Location location = getMostAccurateLocation();
+        Location location = getMostAccurateLocation(System.currentTimeMillis());
         String latitude = location != null ? Double.toString(location.getLatitude()) : "";
         String longitude = location != null ? Double.toString(location.getLongitude()) : "";
         String accuracy = location != null ? Double.toString(location.getAccuracy()) : "";
@@ -186,6 +182,16 @@ public class AuditEventLogger {
         }
     }
 
+    /**
+     * @return true if an event of this type should be ignored given the current audit configuration
+     * and previous events, false otherwise.
+     */
+    private boolean shouldBeIgnored(AuditEvent.AuditEventType eventType) {
+        return !eventType.isLogged()
+                || eventType.isLocationRelated() && !auditConfig.isLocationEnabled()
+                || isDuplicateOfLastLocationEvent(eventType);
+    }
+
     /*
     Question which is in field-list group should be logged only if tracking changes option is
     enabled and its answer has changed
@@ -229,8 +235,8 @@ public class AuditEventLogger {
     }
 
     @Nullable
-    Location getMostAccurateLocation() {
-        removeExpiredLocations();
+    Location getMostAccurateLocation(long currentTime) {
+        removeExpiredLocations(currentTime);
 
         Location bestLocation = null;
         if (!locations.isEmpty()) {
@@ -243,11 +249,11 @@ public class AuditEventLogger {
         return bestLocation;
     }
 
-    private void removeExpiredLocations() {
+    private void removeExpiredLocations(long currentTime) {
         if (!locations.isEmpty()) {
             List<Location> unexpiredLocations = new ArrayList<>();
             for (Location location : locations) {
-                if (System.currentTimeMillis() <= location.getTime() + auditConfig.getLocationMaxAge()) {
+                if (currentTime <= location.getTime() + auditConfig.getLocationMaxAge()) {
                     unexpiredLocations.add(location);
                 }
             }

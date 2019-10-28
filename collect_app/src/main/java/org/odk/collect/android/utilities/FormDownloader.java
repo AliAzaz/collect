@@ -36,7 +36,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -319,7 +318,7 @@ public class FormDownloader {
      * object representing the downloaded file.
      */
     private FileResult downloadXform(String formName, String url)
-            throws IOException, TaskCancelledException, Exception {
+            throws Exception {
         // clean up friendly form name...
         String rootName = formName.replaceAll("[^\\p{L}\\p{Digit}]", " ");
         rootName = rootName.replaceAll("\\p{javaWhitespace}+", " ");
@@ -380,7 +379,7 @@ public class FormDownloader {
      * @param downloadUrl the url to get the contents from.
      */
     private void downloadFile(File file, String downloadUrl)
-            throws IOException, TaskCancelledException, URISyntaxException, Exception {
+            throws Exception {
         File tempFile = File.createTempFile(file.getName(), TEMP_DOWNLOAD_EXTENSION,
                 new File(Collect.CACHE_PATH));
 
@@ -528,7 +527,7 @@ public class FormDownloader {
                     String.valueOf(count), String.valueOf(total));
         }
 
-        List<MediaFile> files = new ArrayList<MediaFile>();
+        List<MediaFile> files = new ArrayList<>();
 
         DocumentFetchResult result = collectServerClient.getXmlDocument(fd.getManifestUrl());
 

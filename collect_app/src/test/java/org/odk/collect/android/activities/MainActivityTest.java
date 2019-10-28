@@ -1,10 +1,11 @@
 package org.odk.collect.android.activities;
 
 import android.content.Intent;
-import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.appcompat.widget.Toolbar;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -107,7 +108,7 @@ public class MainActivityTest {
         ShadowActivity shadowActivity = shadowOf(mainMenuActivity);
         Intent startedIntent = shadowActivity.getNextStartedActivity();
         ShadowIntent shadowIntent = shadowOf(startedIntent);
-        assertEquals(FormChooserList.class.getName(),
+        assertEquals(FormChooserListActivity.class.getName(),
                 shadowIntent.getIntentClass().getName());
     }
 

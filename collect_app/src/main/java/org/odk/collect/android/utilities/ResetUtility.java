@@ -52,17 +52,17 @@ public class ResetUtility {
                     break;
                 case ResetAction.RESET_LAYERS:
                     if (deleteFolderContents(Collect.OFFLINE_LAYERS)) {
-                        failedResetActions.remove(failedResetActions.indexOf(ResetAction.RESET_LAYERS));
+                        failedResetActions.remove((Integer) ResetAction.RESET_LAYERS);
                     }
                     break;
                 case ResetAction.RESET_CACHE:
                     if (deleteFolderContents(Collect.CACHE_PATH)) {
-                        failedResetActions.remove(failedResetActions.indexOf(ResetAction.RESET_CACHE));
+                        failedResetActions.remove((Integer) ResetAction.RESET_CACHE);
                     }
                     break;
                 case ResetAction.RESET_OSM_DROID:
                     if (deleteFolderContents(Configuration.getInstance().getOsmdroidTileCache().getPath())) {
-                        failedResetActions.remove(failedResetActions.indexOf(ResetAction.RESET_OSM_DROID));
+                        failedResetActions.remove((Integer) ResetAction.RESET_OSM_DROID);
                     }
                     break;
             }
@@ -84,17 +84,17 @@ public class ResetUtility {
         new LocaleHelper().updateLocale(context);
 
         if (deletedSettingsFolderContest && deletedSettingsFile) {
-            failedResetActions.remove(failedResetActions.indexOf(ResetAction.RESET_PREFERENCES));
+            failedResetActions.remove((Integer) ResetAction.RESET_PREFERENCES);
         }
 
-        Collect.getInstance().initProperties();
+        Collect.getInstance().initializeJavaRosa();
     }
 
     private void resetInstances() {
         new InstancesDao().deleteInstancesDatabase();
 
         if (deleteFolderContents(Collect.INSTANCES_PATH)) {
-            failedResetActions.remove(failedResetActions.indexOf(ResetAction.RESET_INSTANCES));
+            failedResetActions.remove((Integer) ResetAction.RESET_INSTANCES);
         }
     }
 
@@ -104,7 +104,7 @@ public class ResetUtility {
         File itemsetDbFile = new File(Collect.METADATA_PATH + File.separator + ItemsetDbAdapter.DATABASE_NAME);
 
         if (deleteFolderContents(Collect.FORMS_PATH) && (!itemsetDbFile.exists() || itemsetDbFile.delete())) {
-            failedResetActions.remove(failedResetActions.indexOf(ResetAction.RESET_FORMS));
+            failedResetActions.remove((Integer) ResetAction.RESET_FORMS);
         }
     }
 

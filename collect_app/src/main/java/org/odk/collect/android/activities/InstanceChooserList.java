@@ -22,14 +22,15 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.Loader;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
-
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+
 import org.odk.collect.android.R;
 import org.odk.collect.android.adapters.InstanceListCursorAdapter;
 import org.odk.collect.android.application.Collect;
@@ -195,12 +196,8 @@ public class InstanceChooserList extends InstanceListActivity implements
     }
 
     private void setupAdapter() {
-        String[] data = new String[]{
-                InstanceColumns.DISPLAY_NAME, InstanceColumns.DISPLAY_SUBTEXT, InstanceColumns.DELETED_DATE
-        };
-        int[] view = new int[]{
-                R.id.form_title, R.id.form_subtitle, R.id.form_subtitle2
-        };
+        String[] data = {InstanceColumns.DISPLAY_NAME, InstanceColumns.DELETED_DATE};
+        int[] view = {R.id.form_title, R.id.form_subtitle2};
 
         boolean shouldCheckDisabled = !editMode;
         listAdapter = new InstanceListCursorAdapter(

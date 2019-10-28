@@ -1,11 +1,13 @@
 package org.odk.collect.android.widgets;
 
-import androidx.annotation.NonNull;
 import android.widget.CheckBox;
+
+import androidx.annotation.NonNull;
 
 import org.javarosa.core.model.data.IAnswerData;
 import org.javarosa.core.model.data.StringData;
 import org.junit.Test;
+import org.odk.collect.android.formentry.questions.QuestionDetails;
 import org.odk.collect.android.widgets.base.QuestionWidgetTest;
 
 import static org.junit.Assert.assertEquals;
@@ -21,7 +23,7 @@ public class TriggerWidgetTest extends QuestionWidgetTest<TriggerWidget, StringD
     @NonNull
     @Override
     public TriggerWidget createWidget() {
-        return new TriggerWidget(activity, formEntryPrompt);
+        return new TriggerWidget(activity, new QuestionDetails(formEntryPrompt, "formAnalyticsID"));
     }
 
     @NonNull

@@ -16,10 +16,6 @@
 
 package org.odk.collect.android.adapters;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import timber.log.Timber;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,27 +29,32 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.core.model.data.helper.Selection;
 import org.javarosa.core.reference.InvalidReferenceException;
 import org.javarosa.core.reference.ReferenceManager;
 import org.javarosa.form.api.FormEntryCaption;
 import org.javarosa.form.api.FormEntryPrompt;
+import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.external.ExternalSelectChoice;
+import org.odk.collect.android.formentry.questions.AudioVideoImageTextLabel;
 import org.odk.collect.android.utilities.FileUtils;
 import org.odk.collect.android.utilities.FormEntryPromptUtils;
 import org.odk.collect.android.utilities.ImageConverter;
 import org.odk.collect.android.utilities.WidgetAppearanceUtils;
-import org.odk.collect.android.views.MediaLayout;
 import org.odk.collect.android.views.ODKView;
 import org.odk.collect.android.widgets.SelectWidget;
-import org.odk.collect.android.R;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import timber.log.Timber;
 
 import static org.odk.collect.android.widgets.QuestionWidget.isRTL;
 
@@ -201,7 +202,7 @@ public abstract class AbstractSelectListAdapter extends RecyclerView.Adapter<Abs
     abstract void onItemClick(Selection selection, View view);
 
     abstract class ViewHolder extends RecyclerView.ViewHolder {
-        MediaLayout mediaLayout;
+        AudioVideoImageTextLabel audioVideoImageTextLabel;
         FrameLayout view;
 
         ViewHolder(View itemView) {
@@ -213,8 +214,8 @@ public abstract class AbstractSelectListAdapter extends RecyclerView.Adapter<Abs
                 view.removeAllViews();
                 view.addView(setUpNoButtonsView(index));
             } else {
-                widget.addMediaFromChoice(mediaLayout, index, setUpButton(index), filteredItems);
-                mediaLayout.setEnabled(!widget.getFormEntryPrompt().isReadOnly());
+                widget.addMediaFromChoice(audioVideoImageTextLabel, index, setUpButton(index), filteredItems);
+                audioVideoImageTextLabel.setEnabled(!widget.getFormEntryPrompt().isReadOnly());
             }
         }
     }

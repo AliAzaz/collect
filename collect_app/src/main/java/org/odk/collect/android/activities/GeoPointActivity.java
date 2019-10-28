@@ -24,16 +24,17 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
 import android.text.format.DateUtils;
 import android.view.Window;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.location.LocationListener;
 
 import org.odk.collect.android.R;
 import org.odk.collect.android.location.client.LocationClient;
 import org.odk.collect.android.location.client.LocationClients;
-import org.odk.collect.android.utilities.GeoPointUtils;
+import org.odk.collect.android.utilities.GeoUtils;
 import org.odk.collect.android.utilities.ToastUtils;
 import org.odk.collect.android.widgets.GeoPointWidget;
 
@@ -304,11 +305,11 @@ public class GeoPointActivity extends CollectAbstractActivity implements Locatio
     }
 
     public String getProviderAccuracyMessage(@NonNull Location location) {
-        return getString(R.string.location_provider_accuracy, GeoPointUtils.capitalizeGps(location.getProvider()), truncateDouble(location.getAccuracy()));
+        return getString(R.string.location_provider_accuracy, GeoUtils.capitalizeGps(location.getProvider()), truncateDouble(location.getAccuracy()));
     }
 
     public String getResultStringForLocation(@NonNull Location location) {
-        return String.format("%s %s %s %s", location.getLatitude(), location.getLongitude(), location.getAltitude(), location.getAccuracy());
+        return GeoUtils.formatLocationResultString(location);
     }
 
     private String truncateDouble(float number) {

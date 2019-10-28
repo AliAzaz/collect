@@ -21,9 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,6 +30,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
 
 import com.google.zxing.ChecksumException;
 import com.google.zxing.FormatException;
@@ -85,7 +86,7 @@ public class ShowQRCodeFragment extends Fragment {
     private static final int SELECT_PHOTO = 111;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private final boolean[] checkedItems = new boolean[]{true, true};
+    private final boolean[] checkedItems = {true, true};
 
     @BindView(R.id.ivQRcode)
     ImageView ivQRCode;
@@ -194,7 +195,7 @@ public class ShowQRCodeFragment extends Fragment {
     @OnClick(R.id.tvPasswordWarning)
     void passwordWarningClicked() {
         if (dialog == null) {
-            final String[] items = new String[]{
+            final String[] items = {
                     getString(R.string.admin_password),
                     getString(R.string.server_password)};
 
@@ -270,7 +271,7 @@ public class ShowQRCodeFragment extends Fragment {
         new PreferenceSaver(GeneralSharedPreferences.getInstance(), AdminSharedPreferences.getInstance()).fromJSON(content, new ActionListener() {
             @Override
             public void onSuccess() {
-                Collect.getInstance().initProperties();
+                Collect.getInstance().initializeJavaRosa();
                 ToastUtils.showLongToast(Collect.getInstance().getString(R.string.successfully_imported_settings));
                 getActivity().finish();
                 final LocaleHelper localeHelper = new LocaleHelper();

@@ -62,6 +62,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.hasFocus;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -86,7 +87,7 @@ public class FieldListUpdateTest {
                     Manifest.permission.CAMERA)
             )
             .around(new ResetStateRule())
-            .around(new CopyFormRule(FIELD_LIST_TEST_FORM, "", Collections.singletonList("fruits.csv")));
+            .around(new CopyFormRule(FIELD_LIST_TEST_FORM, Collections.singletonList("fruits.csv")));
 
     @Test
     public void relevanceChangeAtEnd_ShouldToggleLastWidgetVisibility() {
@@ -233,27 +234,25 @@ public class FieldListUpdateTest {
         onView(withText("C1")).check(doesNotExist());
     }
 
-    // TODO: figure out why the third level isn't cleared. Wondering whether there might be an issue
-    // with populateDynamicChoices
-    //    @Test
-    //    public void clearingParentSelect_ShouldUpdateAllDependentLevels() {
-    //        onView(withId(R.id.menu_goto)).perform(click());
-    //        onView(withId(R.id.menu_go_up)).perform(click());
-    //        onView(allOf(withText("Cascading select"), isDisplayed())).perform(click());
-    //        onView(withText(startsWith("Level1"))).perform(click());
-    //
-    //        onView(withText("A")).perform(click());
-    //        onView(withText("A1")).perform(click());
-    //        onView(withText("A1B")).perform(click());
-    //
-    //        onView(withText("A")).perform(longClick());
-    //        onView(withText(R.string.clear_answer)).perform(click());
-    //        onView(withText(R.string.discard_answer)).perform(click());
-    //
-    //        onView(withIndex(withClassName(endsWith("RadioButton")), 0)).check(matches(isNotChecked()));
-    //        onView(withText("A1")).check(doesNotExist());
-    //        onView(withText("A1B")).check(doesNotExist());
-    //    }
+    @Test
+    public void clearingParentSelect_ShouldUpdateAllDependentLevels() {
+        onView(withId(R.id.menu_goto)).perform(click());
+        onView(withId(R.id.menu_go_up)).perform(click());
+        onView(allOf(withText("Cascading select"), isDisplayed())).perform(click());
+        onView(withText(startsWith("Level1"))).perform(click());
+
+        onView(withText("A")).perform(click());
+        onView(withText("A1")).perform(click());
+        onView(withText("A1B")).perform(click());
+
+        onView(withText("A")).perform(longClick());
+        onView(withText(R.string.clear_answer)).perform(click());
+        onView(withText(R.string.discard_answer)).perform(click());
+
+        onView(withIndex(withClassName(endsWith("RadioButton")), 0)).check(matches(isNotChecked()));
+        onView(withText("A1")).check(doesNotExist());
+        onView(withText("A1B")).check(doesNotExist());
+    }
 
     @Test
     public void selectionChangeAtOneCascadeLevelWithMinimalAppearance_ShouldUpdateNextLevels() {
@@ -382,10 +381,9 @@ public class FieldListUpdateTest {
     }
 
     @Test
-    public void search_function_in_field_list() throws InterruptedException {
+    public void searchInFieldList() throws InterruptedException {
         jumpToGroupWithText("Search in field-list");
         onView(withText(startsWith("Source15"))).perform(click());
-        Thread.sleep(1000);
         onView(withText("Select One Answer")).check(matches(isDisplayed())).perform(click());
         onView(withText("Mango")).check(matches(isDisplayed()));
         onView(withText("Oranges")).check(matches(isDisplayed()));

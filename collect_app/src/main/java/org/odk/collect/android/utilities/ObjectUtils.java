@@ -9,6 +9,14 @@ public class ObjectUtils {
     private ObjectUtils() {
     }
 
+    /**
+     * Implementation of Objects.equals for API levels before 19.
+     */
+    @SuppressWarnings("PMD.SuspiciousEqualsMethodName")
+    public static boolean equals(Object a, Object b) {
+        return (a == b) || (a != null && a.equals(b));
+    }
+
     @SuppressWarnings("unchecked")
     @Nullable
     public static <T> T uncheckedCast(Object object) {

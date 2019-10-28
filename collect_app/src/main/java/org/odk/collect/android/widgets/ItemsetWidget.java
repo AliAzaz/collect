@@ -18,20 +18,21 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
-import androidx.annotation.NonNull;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.core.model.condition.EvaluationContext;
 import org.javarosa.core.model.instance.TreeElement;
-import org.javarosa.form.api.FormEntryPrompt;
 import org.javarosa.xpath.XPathNodeset;
 import org.javarosa.xpath.expr.XPathExpression;
 import org.javarosa.xpath.parser.XPathSyntaxException;
 import org.odk.collect.android.R;
 import org.odk.collect.android.application.Collect;
 import org.odk.collect.android.database.ItemsetDbAdapter;
+import org.odk.collect.android.formentry.questions.QuestionDetails;
 import org.odk.collect.android.logic.FormController;
 import org.odk.collect.android.utilities.FileUtil;
 import org.odk.collect.android.utilities.XPathParseTool;
@@ -57,12 +58,12 @@ public class ItemsetWidget extends AbstractSelectOneWidget {
     private final ItemsetDbAdapter adapter;
     private final FileUtil fileUtil;
 
-    protected ItemsetWidget(Context context, FormEntryPrompt formEntryPrompt, boolean autoAdvanceToNext) {
+    protected ItemsetWidget(Context context, QuestionDetails formEntryPrompt, boolean autoAdvanceToNext) {
         this(context, formEntryPrompt, autoAdvanceToNext, new XPathParseTool(), new ItemsetDbAdapter(), new FileUtil());
     }
 
     public ItemsetWidget(Context context,
-                         FormEntryPrompt formEntryPrompt,
+                         QuestionDetails formEntryPrompt,
                          boolean autoAdvance,
                          @NonNull XPathParseTool parseTool,
                          @NonNull ItemsetDbAdapter adapter,
@@ -142,7 +143,7 @@ public class ItemsetWidget extends AbstractSelectOneWidget {
                                     .trim());
                 }
                 // move string forward to after " and "
-                queryString = queryString.substring(andIndex + 5, queryString.length());
+                queryString = queryString.substring(andIndex + 5);
             } else {
                 String subString = queryString.substring(0, orIndex);
                 String[] pair = subString.split("=");
@@ -156,7 +157,7 @@ public class ItemsetWidget extends AbstractSelectOneWidget {
                     arguments.add(pair[1].trim());
                 }
                 // move string forward to after " or "
-                queryString = queryString.substring(orIndex + 4, queryString.length());
+                queryString = queryString.substring(orIndex + 4);
                 orIndex = -1;
             }
         }

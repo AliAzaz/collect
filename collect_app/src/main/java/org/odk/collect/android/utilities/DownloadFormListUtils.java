@@ -71,6 +71,145 @@ public class DownloadFormListUtils {
         return downloadFormList(null, null, null, alwaysCheckMediaFiles);
     }
 
+    private static boolean isMediaFileAlreadyDownloaded(File[] localMediaFiles, MediaFile newMediaFile) {
+        // TODO Zip files are ignored we should find a way to take them into account too
+        if (newMediaFile.getFilename().endsWith(".zip")) {
+            return true;
+        }
+
+        String mediaFileHash = newMediaFile.getHash();
+        mediaFileHash = mediaFileHash.substring(4);
+        for (File localMediaFile : localMediaFiles) {
+            if (mediaFileHash.equals(FileUtils.getMd5Hash(localMediaFile))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void clearTemporaryCredentials(@Nullable String url) {
+        if (url != null) {
+            String host = Uri.parse(url).getHost();
+
+            if (host != null) {
+                webCredentialsUtils.clearCredentials(url);
+            }
+        }
+    }
+
+    private boolean isThisFormAlreadyDownloaded(String formId) {
+        Cursor cursor = formsDao.getFormsCursorForFormId(formId);
+        return cursor == null || cursor.getCount() > 0;
+    }
+
+    private ManifestFile getManifestFile(String manifestUrl) {
+        if (manifestUrl == null) {
+            return null;
+        }
+
+        DocumentFetchResult result = collectServerClient.getXmlDocument(manifestUrl);
+
+        if (result.errorMessage != null) {
+            return null;
+        }
+
+        String errMessage = application.getString(R.string.access_error, manifestUrl);
+
+        if (!result.isOpenRosaResponse) {
+            errMessage += application.getString(R.string.manifest_server_error);
+            Timber.e(errMessage);
+            return null;
+        }
+
+        // Attempt OpenRosa 1.0 parsing
+        Element manifestElement = result.doc.getRootElement();
+        if (!manifestElement.getName().equals("manifest")) {
+            errMessage +=
+                    application.getString(R.string.root_element_error,
+                            manifestElement.getName());
+            Timber.e(errMessage);
+            return null;
+        }
+        String namespace = manifestElement.getNamespace();
+        if (!FormDownloader.isXformsManifestNamespacedElement(manifestElement)) {
+            errMessage += application.getString(R.string.root_namespace_error, namespace);
+            Timber.e(errMessage);
+            return null;
+        }
+        int elements = manifestElement.getChildCount();
+        List<MediaFile> files = new ArrayList<>();
+        for (int i = 0; i < elements; ++i) {
+            if (manifestElement.getType(i) != Element.ELEMENT) {
+                // e.g., whitespace (text)
+                continue;
+            }
+            Element mediaFileElement = manifestElement.getElement(i);
+            if (!FormDownloader.isXformsManifestNamespacedElement(mediaFileElement)) {
+                // someone else's extension?
+                continue;
+            }
+            String name = mediaFileElement.getName();
+            if (name.equalsIgnoreCase("mediaFile")) {
+                String filename = null;
+                String hash = null;
+                String downloadUrl = null;
+                // don't process descriptionUrl
+                int childCount = mediaFileElement.getChildCount();
+                for (int j = 0; j < childCount; ++j) {
+                    if (mediaFileElement.getType(j) != Element.ELEMENT) {
+                        // e.g., whitespace (text)
+                        continue;
+                    }
+                    Element child = mediaFileElement.getElement(j);
+                    if (!FormDownloader.isXformsManifestNamespacedElement(child)) {
+                        // someone else's extension?
+                        continue;
+                    }
+                    String tag = child.getName();
+                    switch (tag) {
+                        case "filename":
+                            filename = XFormParser.getXMLText(child, true);
+                            if (filename != null && filename.length() == 0) {
+                                filename = null;
+                            }
+                            break;
+                        case "hash":
+                            hash = XFormParser.getXMLText(child, true);
+                            if (hash != null && hash.length() == 0) {
+                                hash = null;
+                            }
+                            break;
+                        case "downloadUrl":
+                            downloadUrl = XFormParser.getXMLText(child, true);
+                            if (downloadUrl != null && downloadUrl.length() == 0) {
+                                downloadUrl = null;
+                            }
+                            break;
+                    }
+                }
+                if (filename == null || downloadUrl == null || hash == null) {
+                    errMessage +=
+                            application.getString(R.string.manifest_tag_error,
+                                    Integer.toString(i));
+                    Timber.e(errMessage);
+                    return null;
+                }
+                files.add(new MediaFile(filename, hash, downloadUrl));
+            }
+        }
+
+        return new ManifestFile(result.getHash(), files);
+    }
+
+    private boolean isNewerFormVersionAvailable(String md5Hash) {
+        if (md5Hash == null) {
+            return false;
+        }
+        try (Cursor cursor = formsDao.getFormsCursorForMd5Hash(md5Hash)) {
+            return cursor != null && cursor.getCount() == 0;
+        }
+    }
+
     public HashMap<String, FormDetails> downloadFormList(@Nullable String url, @Nullable String username,
                                                          @Nullable String password, boolean alwaysCheckMediaFiles) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(
@@ -96,7 +235,7 @@ public class DownloadFormListUtils {
 
         // We populate this with available forms from the specified server.
         // <formname, details>
-        HashMap<String, FormDetails> formList = new HashMap<String, FormDetails>();
+        HashMap<String, FormDetails> formList = new HashMap<>();
 
         if (url != null) {
             String host = Uri.parse(url).getHost();
@@ -238,7 +377,7 @@ public class DownloadFormListUtils {
                 }
                 if (formId == null || downloadUrl == null || formName == null) {
                     String error =
-                            "Forms list entry " + Integer.toString(i)
+                            "Forms list entry " + i
                                     + " has missing or empty tags: formID, name, or downloadUrl";
                     Timber.e("Parsing OpenRosa reply -- %s", error);
                     formList.clear();
@@ -299,7 +438,7 @@ public class DownloadFormListUtils {
                     }
                     if (formName == null) {
                         String error =
-                                "Forms list entry " + Integer.toString(i)
+                                "Forms list entry " + i
                                         + " is missing form name or url attribute";
                         Timber.e("Parsing OpenRosa reply -- %s", error);
                         formList.clear();
@@ -319,129 +458,6 @@ public class DownloadFormListUtils {
         return formList;
     }
 
-    private void clearTemporaryCredentials(@Nullable String url) {
-        if (url != null) {
-            String host = Uri.parse(url).getHost();
-
-            if (host != null) {
-                webCredentialsUtils.clearCredentials(url);
-            }
-        }
-    }
-
-    private boolean isThisFormAlreadyDownloaded(String formId) {
-        Cursor cursor = formsDao.getFormsCursorForFormId(formId);
-        return cursor == null || cursor.getCount() > 0;
-    }
-
-    private ManifestFile getManifestFile(String manifestUrl) {
-        if (manifestUrl == null) {
-            return null;
-        }
-
-        DocumentFetchResult result = collectServerClient.getXmlDocument(manifestUrl);
-
-        if (result.errorMessage != null) {
-            return null;
-        }
-
-        String errMessage = application.getString(R.string.access_error, manifestUrl);
-
-        if (!result.isOpenRosaResponse) {
-            errMessage += application.getString(R.string.manifest_server_error);
-            Timber.e(errMessage);
-            return null;
-        }
-
-        // Attempt OpenRosa 1.0 parsing
-        Element manifestElement = result.doc.getRootElement();
-        if (!manifestElement.getName().equals("manifest")) {
-            errMessage +=
-                    application.getString(R.string.root_element_error,
-                            manifestElement.getName());
-            Timber.e(errMessage);
-            return null;
-        }
-        String namespace = manifestElement.getNamespace();
-        if (!FormDownloader.isXformsManifestNamespacedElement(manifestElement)) {
-            errMessage += application.getString(R.string.root_namespace_error, namespace);
-            Timber.e(errMessage);
-            return null;
-        }
-        int elements = manifestElement.getChildCount();
-        List<MediaFile> files = new ArrayList<>();
-        for (int i = 0; i < elements; ++i) {
-            if (manifestElement.getType(i) != Element.ELEMENT) {
-                // e.g., whitespace (text)
-                continue;
-            }
-            Element mediaFileElement = manifestElement.getElement(i);
-            if (!FormDownloader.isXformsManifestNamespacedElement(mediaFileElement)) {
-                // someone else's extension?
-                continue;
-            }
-            String name = mediaFileElement.getName();
-            if (name.equalsIgnoreCase("mediaFile")) {
-                String filename = null;
-                String hash = null;
-                String downloadUrl = null;
-                // don't process descriptionUrl
-                int childCount = mediaFileElement.getChildCount();
-                for (int j = 0; j < childCount; ++j) {
-                    if (mediaFileElement.getType(j) != Element.ELEMENT) {
-                        // e.g., whitespace (text)
-                        continue;
-                    }
-                    Element child = mediaFileElement.getElement(j);
-                    if (!FormDownloader.isXformsManifestNamespacedElement(child)) {
-                        // someone else's extension?
-                        continue;
-                    }
-                    String tag = child.getName();
-                    switch (tag) {
-                        case "filename":
-                            filename = XFormParser.getXMLText(child, true);
-                            if (filename != null && filename.length() == 0) {
-                                filename = null;
-                            }
-                            break;
-                        case "hash":
-                            hash = XFormParser.getXMLText(child, true);
-                            if (hash != null && hash.length() == 0) {
-                                hash = null;
-                            }
-                            break;
-                        case "downloadUrl":
-                            downloadUrl = XFormParser.getXMLText(child, true);
-                            if (downloadUrl != null && downloadUrl.length() == 0) {
-                                downloadUrl = null;
-                            }
-                            break;
-                    }
-                }
-                if (filename == null || downloadUrl == null || hash == null) {
-                    errMessage +=
-                            application.getString(R.string.manifest_tag_error,
-                                    Integer.toString(i));
-                    Timber.e(errMessage);
-                    return null;
-                }
-                files.add(new MediaFile(filename, hash, downloadUrl));
-            }
-        }
-
-        return new ManifestFile(result.getHash(), files);
-    }
-
-    private boolean isNewerFormVersionAvailable(String md5Hash) {
-        if (md5Hash == null) {
-            return false;
-        }
-        try (Cursor cursor = formsDao.getFormsCursorForMd5Hash(md5Hash)) {
-            return cursor != null && cursor.getCount() == 0;
-        }
-    }
-
     private boolean areNewerMediaFilesAvailable(String formId, String formVersion, List<MediaFile> newMediaFiles) {
         String mediaDirPath = formsDao.getFormMediaPath(formId, formVersion);
         if (mediaDirPath != null) {
@@ -452,27 +468,9 @@ public class DownloadFormListUtils {
                         return true;
                     }
                 }
-            } else if (!newMediaFiles.isEmpty()) {
-                return true;
-            }
+            } else return !newMediaFiles.isEmpty();
         }
 
-        return false;
-    }
-
-    private static boolean isMediaFileAlreadyDownloaded(File[] localMediaFiles, MediaFile newMediaFile) {
-        // TODO Zip files are ignored we should find a way to take them into account too
-        if (newMediaFile.getFilename().endsWith(".zip")) {
-            return true;
-        }
-
-        String mediaFileHash = newMediaFile.getHash();
-        mediaFileHash = mediaFileHash.substring(4, mediaFileHash.length());
-        for (File localMediaFile : localMediaFiles) {
-            if (mediaFileHash.equals(FileUtils.getMd5Hash(localMediaFile))) {
-                return true;
-            }
-        }
         return false;
     }
 

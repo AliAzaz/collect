@@ -5,6 +5,8 @@ import androidx.annotation.Nullable;
 
 import org.kxml2.io.KXmlParser;
 import org.kxml2.kdom.Document;
+import org.odk.collect.android.http.openrosa.HttpGetResult;
+import org.odk.collect.android.http.openrosa.OpenRosaHttpInterface;
 import org.odk.collect.android.utilities.DocumentFetchResult;
 import org.odk.collect.android.utilities.WebCredentialsUtils;
 import org.xmlpull.v1.XmlPullParser;
@@ -16,6 +18,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import javax.inject.Inject;
 
@@ -57,7 +60,7 @@ public class CollectServerClient {
             }
 
             try (InputStream resultInputStream = inputStreamResult.getInputStream();
-                 InputStreamReader streamReader = new InputStreamReader(resultInputStream, "UTF-8")) {
+                 InputStreamReader streamReader = new InputStreamReader(resultInputStream, StandardCharsets.UTF_8)) {
 
                 doc = new Document();
                 KXmlParser parser = new KXmlParser();

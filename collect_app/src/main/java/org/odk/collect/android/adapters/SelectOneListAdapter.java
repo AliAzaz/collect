@@ -16,10 +16,6 @@
 
 package org.odk.collect.android.adapters;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatRadioButton;
-import androidx.core.content.ContextCompat;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +23,10 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatRadioButton;
+import androidx.core.content.ContextCompat;
 
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.core.model.data.helper.Selection;
@@ -81,8 +81,8 @@ public class SelectOneListAdapter extends AbstractSelectListAdapter
             } else {
                 autoAdvanceIcon = v.findViewById(R.id.auto_advance_icon);
                 autoAdvanceIcon.setVisibility(((AbstractSelectOneWidget) widget).isAutoAdvance() ? View.VISIBLE : View.GONE);
-                mediaLayout = v.findViewById(R.id.mediaLayout);
-                widget.initMediaLayoutSetUp(mediaLayout);
+                audioVideoImageTextLabel = v.findViewById(R.id.mediaLayout);
+                widget.init(audioVideoImageTextLabel);
             }
         }
 

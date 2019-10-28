@@ -16,14 +16,15 @@ package org.odk.collect.android.adapters;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import androidx.annotation.NonNull;
-import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.odk.collect.android.R;
 import org.odk.collect.android.listeners.RecyclerViewClickListener;
@@ -61,7 +62,9 @@ public class SortDialogAdapter extends RecyclerView.Adapter<SortDialogAdapter.Vi
         int color = position == selectedSortingOrder ? themeUtils.getAccentColor() : themeUtils.getPrimaryTextColor();
         viewHolder.txtViewTitle.setTextColor(color);
         try {
-            viewHolder.imgViewIcon.setImageResource(ApplicationConstants.getSortLabelToIconMap().get(sortList[position]));
+            int iconId = ApplicationConstants.getSortLabelToIconMap().get(sortList[position]);
+            viewHolder.imgViewIcon.setImageResource(iconId);
+            viewHolder.imgViewIcon.setTag(iconId);
             viewHolder.imgViewIcon.setImageDrawable(DrawableCompat.wrap(viewHolder.imgViewIcon.getDrawable()).mutate());
             DrawableCompat.setTintList(viewHolder.imgViewIcon.getDrawable(), position == selectedSortingOrder ? ColorStateList.valueOf(color) : null);
         } catch (NullPointerException e) {
